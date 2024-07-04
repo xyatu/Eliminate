@@ -1,0 +1,21 @@
+{
+  "general": {
+    "highQuality": true,
+    "designResolution": {
+      "width": 1920,
+      "height": 1080
+    }
+  },
+  "__version__": "1.0.5",
+  "fbx": {
+    "legacyFbxImporter": {
+      "visible": true
+    }
+  },
+  "layer": [
+    {
+      "name": "Default",
+      "value": 1
+    }
+  ]
+}
