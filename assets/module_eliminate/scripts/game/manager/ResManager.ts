@@ -21,6 +21,15 @@ export default class ResManager extends Component {
     @property(SpriteFrame)
     private e: SpriteFrame | null = null;
 
+    @property(SpriteFrame)
+    private ver: SpriteFrame | null = null;
+
+    @property(SpriteFrame)
+    private hori: SpriteFrame | null = null;
+
+    @property(SpriteFrame)
+    private matrix: SpriteFrame | null = null;
+
     private static instance: ResManager = null;
 
     protected onLoad() {
@@ -42,6 +51,12 @@ export default class ResManager extends Component {
                 return this.instance.d;
             case TileType.E:
                 return this.instance.e;
+            case TileType.Ver:
+                return this.instance.ver;
+            case TileType.Hori:
+                return this.instance.hori;
+            case TileType.Matrix:
+                return this.instance.matrix;
         }
     }
 }

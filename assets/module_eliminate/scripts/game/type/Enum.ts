@@ -8,6 +8,10 @@ export enum TileType {
     C,
     D,
     E,
+    Ver,
+    Hori,
+    Matrix,
+    Z = 30,
 }
 
 /**

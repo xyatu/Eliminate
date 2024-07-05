@@ -1,8 +1,12 @@
-import { _decorator, error, log, UITransform, Vec2, Vec3, warn } from 'cc';
+import { _decorator, Canvas, director, error, log, UI, UITransform, v2, v3, Vec2, Vec3, view, View, warn } from 'cc';
 import { TileType, SlideDirection } from "../type/Enum";
 import GameConfig from "../../data/GameConfig";
 import { Coordinate, Coord, Combination } from "../type/DataStructure";
 import TileManager from '../manager/TileManager';
+import MapManager from '../manager/MapManager';
+import { EliminateState } from '../manager/EliminateState';
+import { UI_Eliminate } from '../../../UI_Eliminate/UI_Eliminate';
+import { Layout_Eliminate } from '../../../UI_Eliminate/Layout_Eliminate';
 
 export default class GameUtil {
 
@@ -11,11 +15,19 @@ export default class GameUtil {
      * @param exclude 需排除的类型
      */
     public static getRandomType(exclude: TileType[] = []): TileType {
-        let types = GameConfig.types.concat();
-        for (let i = 0; i < exclude.length; i++) {
-            types.splice(types.indexOf(exclude[i]), 1);
+
+        // 根据权重生成加权类型数组
+        let weightedTypes: TileType[] = [];
+        for (let type in GameConfig.tileTypeWeight) {
+            if (exclude.indexOf(parseInt(type)) === -1 && GameConfig.tileTypeWeight[type] > 0) {
+                for (let i = 0; i < GameConfig.tileTypeWeight[type]; i++) {
+                    weightedTypes.push(parseInt(type));
+                }
+            }
         }
-        return types[Math.floor(types.length * Math.random())];
+
+        // 从加权类型数组中随机选择一个类型
+        return weightedTypes[Math.floor(weightedTypes.length * Math.random())];
     }
 
     /**
@@ -40,45 +52,20 @@ export default class GameUtil {
      */
 
     public static getTileByPosition(targetPos: Vec2): Coordinate {
-
         const gridParent = TileManager.getmapContainer();
-        
-        if (!gridParent) {
-            warn('TileManager.mapContainer is not assigned or is null');
-            return null;
-        }
-        // 转换为本地坐标
-        const localTouchPos = gridParent.getComponent(UITransform).convertToNodeSpaceAR(new Vec3(targetPos.x, targetPos.y, 0));
 
-        // 遍历所有子节点，检查触摸位置
-        for (let row = 0; row < GameConfig.row; row++) {
-            for (let col = 0; col < GameConfig.col; col++) {
-                const index = row * 8 + col;
-                const spriteNode = gridParent.children[index];
-
-                if (!spriteNode) {
-                    continue;
-                }
-
-                // 计算sprite节点的中心位置
-                const spritePos = spriteNode.position;
-
-                // 计算sprite节点的边界
-                const uiTransform = spriteNode.getComponent(UITransform);
-                const halfWidth = uiTransform.width / 2;
-                const halfHeight = uiTransform.height / 2;
-                const left = spritePos.x - halfWidth - 2.5;
-                const right = spritePos.x + halfWidth + 2.5;
-                const bottom = spritePos.y - halfHeight - 2.5;
-                const top = spritePos.y + halfHeight + 2.5;
-
-                // 判断触摸位置是否在当前sprite节点的区域内
-                if (localTouchPos.x >= left && localTouchPos.x <= right && localTouchPos.y >= bottom && localTouchPos.y <= top) {
-                    return Coord(col, 7-row);
+        const localTouchPos = new Vec2(targetPos.x / view.getScaleX() - gridParent.getWorldPosition().x, targetPos.y / view.getScaleY() - gridParent.getWorldPosition().y)
+        for (let c = 0; c < GameConfig.col; c++) {
+            if (localTouchPos.x >= MapManager.getPosArr()[c][0].x - GameConfig.size / 2 &&
+                localTouchPos.x <= MapManager.getPosArr()[c][0].x + GameConfig.size / 2) {
+                for (let r = 0; r < GameConfig.row; r++) {
+                    if (localTouchPos.y >= MapManager.getPosArr()[c][r].y - GameConfig.size / 2 &&
+                        localTouchPos.y <= MapManager.getPosArr()[c][r].y + GameConfig.size / 2) {
+                        return Coord(c, r);
+                    }
                 }
             }
         }
-        warn(`不在格内`)
         return null;
     }
 
@@ -99,6 +86,12 @@ export default class GameUtil {
                 return coord.x === GameConfig.col - 1 ? null : Coord(coord.x + 1, coord.y);
         }
     }
+
+    public static changeScore(interval: number){
+        EliminateState.changeScore(interval);
+        Layout_Eliminate.changeScore(EliminateState.getScore());
+    }
+
     /**
      * 获取可消除的组合
      */
@@ -203,7 +196,7 @@ export default class GameUtil {
         let typeMap: TileType[][] = [];
         for (let c = 0; c < GameConfig.col; c++) {
             let colSet: TileType[] = [];
-            for (let r = 0; r < GameConfig.row/2; r++) {
+            for (let r = 0; r < GameConfig.row / 2; r++) {
                 let excludeTypes = [];
                 // 水平检测前面 2 个相同类型
                 let rowType: TileType = null;

@@ -1,4 +1,4 @@
-import { _decorator, Component, Sprite, Event, tween, v3, NodeEventType, EventTouch, log, Vec3, UITransform } from 'cc';
+import { _decorator, Component, Sprite, Event, tween, v3, NodeEventType, EventTouch, log, Vec3, UITransform, warn } from 'cc';
 const { ccclass, property } = _decorator;
 
 import { TileType, TileEvent } from "../type/Enum";
@@ -7,6 +7,7 @@ import ResManager from "../manager/ResManager";
 import PoolManager from "../manager/PoolManager";
 import { GameEvent } from '../../../eazax-ccc/core/GameEvent';
 import TileManager from '../manager/TileManager';
+import { EliminateState } from '../manager/EliminateState';
 
 @ccclass('Tile')
 export default class Tile extends Component {
@@ -32,6 +33,13 @@ export default class Tile extends Component {
         this.bindTouchEvents();
     }
 
+    protected start(): void {
+        EliminateState.inst.cbGameOverEvent.push(() => {
+            warn(`Tile Un Bind Touch Events`);
+            this.unbindTouchEvents();
+        })
+    }
+
     protected onDestroy() {
         this.unbindTouchEvents();
     }
@@ -55,15 +63,15 @@ export default class Tile extends Component {
      * @param e 参数
      */
     private onTouchStart(e: EventTouch) {
-        log(`Start`)
-        GameEvent.emit(TileEvent.TouchStart, this._coord.copy(), e.getLocation());
+        if (e.getID() === 0) {
+            GameEvent.emit(TileEvent.TouchStart, this._coord.copy(), e.getLocation());
+        }
     }
 
     /**
      * touchend 回调
      */
     private onTouchEnd() {
-        log(`End`)
         GameEvent.emit(TileEvent.TouchEnd);
     }
 
@@ -72,7 +80,6 @@ export default class Tile extends Component {
      * @param e 参数
      */
     private onTouchCancel(e: EventTouch) {
-        log(`Cancel`)
         GameEvent.emit(TileEvent.TouchCancel, this._coord.copy(), e.getLocation());
     }
 

@@ -1,4 +1,4 @@
-import { Button, assetManager, AssetManager, director } from "cc";
+import { Button, assetManager, AssetManager, director, log } from "cc";
 import { GameUILayers } from "../../scripts/GameUILayers";
 import { Layout_DemoList } from "./Layout_DemoList";
 import { ModuleDef } from "../../scripts/ModuleDef";
@@ -21,6 +21,7 @@ export class UI_DemoList extends tgxUIController {
     }
 
     protected onCreated(): void {
+        log(1)
         let layout = this.layout as Layout_DemoList;
         layout.btnClose.node.active = false;
         this.onButtonEvent(layout.btnClose, () => {
