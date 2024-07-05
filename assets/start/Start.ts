@@ -22,7 +22,7 @@ export class Start extends Component {
     txtLoading: Label;
 
     @property(Prefab)
-    uiCanvasPrefab: Prefab
+    uiCanvasPrefab: Prefab;
 
     @property(Node)
     loadingBar: Node;
