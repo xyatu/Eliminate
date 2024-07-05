@@ -19,7 +19,7 @@ const _totalNum = _preloadBundles.length + _preloadRes.length + 1;
 @ccclass('Start')
 export class Start extends Component {
     @property(Label)
-    txtLoading: Label;
+    txtLoading: Label
 
     @property(Prefab)
     uiCanvasPrefab: Prefab;
