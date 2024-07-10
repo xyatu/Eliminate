@@ -7,7 +7,8 @@ import { tgxUIController, tgxUIMgr, tgxUIWaiting } from "../../core_tgx/tgx";
 
 const DemoList = [
     { bundle: ModuleDef.DEMO_TANK, entryScene: 'tank_game' },
-    { bundle: ModuleDef.DEMO_ROOSTER, entryScene: 'rooster_jump' },
+    // { bundle: ModuleDef.DEMO_ROOSTER, entryScene: 'rooster_jump' },
+    { bundle: ModuleDef.GAME_BUILD, entryScene: 'build_game' },
     { bundle: ModuleDef.GAME_ELIMINATE, entryScene: 'eliminate_game' },
 ];
 
@@ -21,7 +22,6 @@ export class UI_DemoList extends tgxUIController {
     }
 
     protected onCreated(): void {
-        log(1)
         let layout = this.layout as Layout_DemoList;
         layout.btnClose.node.active = false;
         this.onButtonEvent(layout.btnClose, () => {

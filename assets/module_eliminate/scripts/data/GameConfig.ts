@@ -22,4 +22,6 @@ export default class GameConfig {
     public static eliminateScore: number = 100;
 
     public static autoFallInterval: number = 0.5;
+
+    public static initialRow: number = 0;
 }

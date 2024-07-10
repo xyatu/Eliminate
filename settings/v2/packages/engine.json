@@ -18,10 +18,10 @@
         "_value": true
       },
       "skeletal-animation": {
-        "_value": true
+        "_value": false
       },
       "3d": {
-        "_value": true
+        "_value": false
       },
       "2d": {
         "_value": true
@@ -36,7 +36,7 @@
         "_value": false
       },
       "physics": {
-        "_value": true,
+        "_value": false,
         "_option": "physics-ammo"
       },
       "physics-ammo": {
@@ -65,7 +65,7 @@
         "_value": true
       },
       "primitive": {
-        "_value": true
+        "_value": false
       },
       "profiler": {
         "_value": true
@@ -95,7 +95,7 @@
         "_value": true
       },
       "websocket": {
-        "_value": true
+        "_value": false
       },
       "websocket-server": {
         "_value": false
@@ -107,7 +107,7 @@
         "_value": false
       },
       "tiled-map": {
-        "_value": false
+        "_value": true
       },
       "spine": {
         "_value": false
@@ -128,19 +128,15 @@
     "flags": {},
     "includeModules": [
       "2d",
-      "3d",
       "animation",
       "audio",
       "base",
       "gfx-webgl",
       "intersection-2d",
-      "physics-ammo",
-      "primitive",
       "profiler",
-      "skeletal-animation",
+      "tiled-map",
       "tween",
-      "ui",
-      "websocket"
+      "ui"
     ],
     "noDeprecatedFeatures": {
       "value": false,

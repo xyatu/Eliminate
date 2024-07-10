@@ -1,0 +1,14 @@
+{
+  "ver": "1.1.45",
+  "importer": "prefab",
+  "imported": true,
+  "uuid": "b7ddcf85-a55e-4f08-b2fb-43997b8b5742",
+  "files": [
+    ".json"
+  ],
+  "subMetas": {},
+  "userData": {
+    "syncNodeName": "tabView",
+    "persistent": true
+  }
+}

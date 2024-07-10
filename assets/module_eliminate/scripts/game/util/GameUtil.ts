@@ -5,8 +5,8 @@ import { Coordinate, Coord, Combination } from "../type/DataStructure";
 import TileManager from '../manager/TileManager';
 import MapManager from '../manager/MapManager';
 import { EliminateState } from '../manager/EliminateState';
-import { UI_Eliminate } from '../../../UI_Eliminate/UI_Eliminate';
-import { Layout_Eliminate } from '../../../UI_Eliminate/Layout_Eliminate';
+import { UI_Eliminate } from '../../../ui_eliminate/UI_Eliminate';
+import { Layout_Eliminate } from '../../../ui_eliminate/Layout_Eliminate';
 
 export default class GameUtil {
 
@@ -196,7 +196,7 @@ export default class GameUtil {
         let typeMap: TileType[][] = [];
         for (let c = 0; c < GameConfig.col; c++) {
             let colSet: TileType[] = [];
-            for (let r = 0; r < GameConfig.row / 2; r++) {
+            for (let r = 0; r < GameConfig.initialRow; r++) {
                 let excludeTypes = [];
                 // 水平检测前面 2 个相同类型
                 let rowType: TileType = null;

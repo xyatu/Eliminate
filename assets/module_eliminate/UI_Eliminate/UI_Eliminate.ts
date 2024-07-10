@@ -11,7 +11,7 @@ const BundleName = ModuleDef.GAME_ELIMINATE;
 export class UI_Eliminate extends tgxUIController {
 
     constructor() {
-        super('UI_Eliminate/UI_Eliminate', GameUILayers.HUD, Layout_Eliminate);
+        super('ui_eliminate/UI_Eliminate', GameUILayers.HUD, Layout_Eliminate);
     }
 
     public getRes(): [] {
@@ -28,3 +28,4 @@ export class UI_Eliminate extends tgxUIController {
 }
 
 
+ 

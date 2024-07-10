@@ -4,4 +4,5 @@ export class SceneDef{
     public static TANK_GAME = 'tank_game';
     public static ROOSTER_JUMP = 'rooster_jump';
     public static ELIMINATE_GAME = 'eliminate_game';
+    public static BUILD_GAME = 'build_game';
 }

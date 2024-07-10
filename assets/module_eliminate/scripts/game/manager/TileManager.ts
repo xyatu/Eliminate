@@ -10,7 +10,7 @@ import MapManager from "./MapManager";
 import { Coordinate, Combination, Coord } from "../type/DataStructure";
 import { GameEvent } from "../../../eazax-ccc/core/GameEvent";
 import ResManager from './ResManager';
-import { UI_Eliminate } from '../../../UI_Eliminate/UI_Eliminate';
+import { UI_Eliminate } from '../../../ui_eliminate/UI_Eliminate';
 import { EliminateState } from './EliminateState';
 
 @ccclass('TileManager')
@@ -446,10 +446,6 @@ export default class TileManager extends Component {
             if (!this.getType(c, r)) {
                 // 往上找方块
                 for (let nr = r + 1; nr < GameConfig.row; nr++) {
-                    // if (this.selectedCoord && this.selectedCoord.x == c && this.selectedCoord.y == nr) {
-                    //     nr++;
-                    //     continue;
-                    // }
                     // 找到可以用的方块
                     if (this.getType(c, nr)) {
                         // 转移数据
@@ -509,7 +505,11 @@ export default class TileManager extends Component {
                                         for (let c = 0; c < GameConfig.col; c++) {
                                             for (let r = 0; r < GameConfig.row; r++) {
                                                 if (this.getType(c, r)) {
-                                                    this.getTile(c, r).node.setPosition(v3(MapManager.getPos(c, r).x, MapManager.getPos(c, r).y, 0))
+                                                    try {
+                                                        this.getTile(c, r).node.setPosition(v3(MapManager.getPos(c, r).x, MapManager.getPos(c, r).y, 0))
+                                                    } catch (error) {
+                                                        
+                                                    }
                                                 }
                                             }
                                         }
@@ -604,9 +604,9 @@ export default class TileManager extends Component {
      */
     private generateInitTypeMap() {
         this.typeMap = GameUtil.getInitTypeMap();
-        if (!GameUtil.hasValidCombo(this.typeMap)) {
-            this.typeMap = GameUtil.getInitTypeMap();
-        }
+        // if (!GameUtil.hasValidCombo(this.typeMap)) {
+        //     this.typeMap = GameUtil.getInitTypeMap();
+        // }
     }
 
     /**
@@ -616,7 +616,7 @@ export default class TileManager extends Component {
         this.tileMap = [];
         for (let c = 0; c < GameConfig.col; c++) {
             let colTileSet: Tile[] = [];
-            for (let r = 0; r < GameConfig.row / 2; r++) {
+            for (let r = 0; r < GameConfig.initialRow; r++) {
                 colTileSet.push(this.getNewTile(c, r, this.typeMap[c][r]));
             }
             this.tileMap.push(colTileSet);

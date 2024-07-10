@@ -3,5 +3,6 @@ export class ModuleDef {
     public static DEMO_ROOSTER = 'module_demo_rooster';
     public static DEMO_TANK = 'module_demo_tank';
     public static GAME_ELIMINATE = 'module_eliminate';
+    public static GAME_BUILD = 'module_build';
     public static EXTRA = 'module_extra';
 }

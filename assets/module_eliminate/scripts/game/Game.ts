@@ -4,7 +4,7 @@ const { ccclass, property } = _decorator;
 import MapManager from "./manager/MapManager";
 import TileManager from "./manager/TileManager";
 import { tgxUIController, tgxUIMgr } from '../../../core_tgx/tgx';
-import { UI_Eliminate } from '../../UI_Eliminate/UI_Eliminate';
+import { UI_Eliminate } from '../../ui_eliminate/UI_Eliminate';
 import { EliminateState } from './manager/EliminateState';
 
 @ccclass('Game')
