@@ -555,7 +555,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 79.99642906911929,
+      "width": 80,
       "height": 63
     },
     "_anchorPoint": {
@@ -594,7 +594,7 @@
     "_string": "提示",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 56.0625,
+    "_actualFontSize": 40,
     "_fontSize": 40,
     "_fontFamily": "Arial",
     "_lineHeight": 50,
@@ -909,7 +909,7 @@
     "_string": "取消",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 49.0546875,
+    "_actualFontSize": 35,
     "_fontSize": 35,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -1258,7 +1258,7 @@
     "_string": "确定",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 49.0546875,
+    "_actualFontSize": 35,
     "_fontSize": 35,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -1550,7 +1550,7 @@
     "_string": "这是一个提示框！",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 42.046875,
+    "_actualFontSize": 30,
     "_fontSize": 30,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -1597,8 +1597,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 1280,
-      "height": 720
+      "width": 750,
+      "height": 1334
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -1704,7 +1704,7 @@
     "fileId": "7etDGRQhVNyosFTAh8Bga7"
   },
   {
-    "__type__": "6ecd6IlzI9HPLIIqQ4aHRcQ",
+    "__type__": "186a0kry6FHVLzv3vN9L//i",
     "_name": "",
     "_objFlags": 0,
     "__editorExtras__": {},
@@ -1731,7 +1731,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "88/DnIGsdLVJ1OYvtc9XIE"
+    "fileId": "b7ew4hAodKjaeijWuX94Sl"
   },
   {
     "__type__": "cc.PrefabInfo",

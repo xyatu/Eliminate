@@ -68,15 +68,29 @@ export default class BuildMapManager {
     }
 
     public static RemoveBuildFromMap(building: Node) {
-        let mapBuilding = this.dataBuilding.find(databuilding => databuilding.node == building);
-        for (let i = 0; i < mapBuilding.coordArr.length; i++) {
-            let coord = mapBuilding.coordArr[i];
-            this.dataMapDit[mapBuilding.type][coord.y][coord.x] = 0;
-            this.nodeMapDit[mapBuilding.type][coord.y][coord.x] = null;
+        let mapBuilding = this.dataBuilding.find(databuilding => databuilding.node === building);
+
+        if (mapBuilding) {
+            // 更新地图数据
+            for (let i = 0; i < mapBuilding.coordArr.length; i++) {
+                let coord = mapBuilding.coordArr[i];
+                this.dataMapDit[mapBuilding.type][coord.y][coord.x] = 0;
+                this.nodeMapDit[mapBuilding.type][coord.y][coord.x] = null;
+            }
+
+            // 找到并移除该建筑物
+            const index = this.dataBuilding.indexOf(mapBuilding);
+            if (index !== -1) {
+                this.dataBuilding.splice(index, 1);
+            }
         }
-        this.dataBuilding.filter(databuilding => databuilding.node == building);
-        building.destroy();
+
+        // 检查节点是否有效并销毁
+        if (building.isValid) {
+            building.destroy();
+        }
     }
+
 
     public static ClearAll() {
         this.dataBuilding.forEach(data => {
@@ -86,17 +100,16 @@ export default class BuildMapManager {
                 this.nodeMapDit[data.type][coord.y][coord.x] = null;
             }
             try {
-                if (data.node.isValid) data.node.destroy();
+                if (data.node.isValid) {
+                    data.node.destroy();
+                }
             } catch (error) {
-
             }
-            data = null;
-        })
-        this.dataBuilding.filter(databuilding => databuilding.node != null);
-    }
+        });
 
-    public static Revoke() {
-
+        // 过滤掉所有 node 为空的 dataBuilding 元素，并重新赋值给 this.dataBuilding
+        this.dataBuilding = this.dataBuilding.filter(databuilding => databuilding.node != null);
+        this.ClearSelectNode();
     }
 
     public static RemoveSelectNode() {

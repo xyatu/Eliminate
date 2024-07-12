@@ -1,4 +1,4 @@
-import { instantiate, log, math, Node, NodeEventType, size, sp, Sprite, SpriteFrame, UITransform, v3, Vec3 } from "cc";
+import { instantiate, log, math, Node, NodeEventType, rect, Rect, size, sp, Sprite, SpriteFrame, UITransform, v2, v3, Vec3 } from "cc";
 import { Layout_Building } from "./Layout_Building";
 import { Layout_MapGrid } from "../map/Layout_MapGrid";
 import { Coord, Coordinate } from "../../../module_eliminate/scripts/game/type/DataStructure";
@@ -9,11 +9,67 @@ import { UI_Building } from "./UI_Building";
 import BuildGameUtil from "../../script/BuildGameUtil";
 
 const directions = [
+    { dx: -1, dy: 1 },  // 左上
     { dx: 0, dy: 1 },  // 上
+    { dx: 1, dy: 1 },  // 右上
+    { dx: -1, dy: 0 },   // 左
+    { dx: 0, dy: 0 },   // 中
+    { dx: 1, dy: 0 },  // 右
+    { dx: -1, dy: -1 },   // 左下
     { dx: 0, dy: -1 },   // 下
-    { dx: -1, dy: 0 },  // 左
-    { dx: 1, dy: 0 },   // 右
+    { dx: 1, dy: -1 },   // 右下
 ];
+
+const autoTileMap: { [key: number]: number[] } = {
+    0: [26, 27, 32, 33],
+    1: [4, 27, 32, 33],
+    2: [26, 5, 32, 33],
+    3: [4, 5, 32, 33],
+    4: [26, 27, 32, 11],
+    5: [4, 27, 32, 11],
+    6: [26, 5, 32, 11],
+    7: [4, 5, 32, 11],
+    8: [26, 27, 10, 33],
+    9: [4, 27, 10, 33],
+    10: [26, 5, 10, 33],
+    11: [4, 5, 10, 33],
+    12: [26, 27, 10, 11],
+    13: [4, 27, 10, 11],
+    14: [26, 5, 10, 11],
+    15: [4, 5, 10, 11],
+    16: [24, 25, 30, 31],
+    17: [24, 5, 30, 31],
+    18: [24, 25, 30, 11],
+    19: [24, 5, 30, 11],
+    20: [14, 15, 20, 21],
+    21: [14, 15, 20, 11],
+    22: [14, 15, 10, 21],
+    23: [14, 15, 10, 11],
+    24: [28, 29, 34, 35],
+    25: [28, 29, 10, 35],
+    26: [4, 29, 34, 35],
+    27: [4, 29, 10, 35],
+    28: [26, 27, 44, 45],
+    29: [4, 39, 44, 45],
+    30: [38, 5, 44, 45],
+    31: [4, 5, 44, 45],
+    32: [24, 29, 30, 35],
+    33: [14, 15, 44, 45],
+    34: [12, 13, 18, 19],
+    35: [12, 13, 18, 11],
+    36: [16, 17, 22, 23],
+    37: [16, 17, 10, 23],
+    38: [40, 41, 46, 47],
+    39: [4, 41, 46, 47],
+    40: [36, 37, 42, 43],
+    41: [36, 5, 42, 43],
+    42: [12, 17, 18, 23],
+    43: [12, 13, 42, 43],
+    44: [36, 41, 42, 47],
+    45: [16, 17, 46, 47],
+    46: [12, 17, 42, 47],
+    47: [12, 17, 42, 47],
+};
 
 const visited = new Set<string>();
 
@@ -34,25 +90,16 @@ export class Builder {
     buildBuilding(layout: Layout_Building, ui: UI_Building): boolean {
         let building = instantiate(layout.building);
 
-        let sprite = building.getChildByName('Sprite').getComponent(Sprite);
-        sprite.spriteFrame = layout.sprite;
-        sprite.color = layout.node.getComponent(Sprite).color;
-        this.setBuildingScale(layout, building, sprite);
-
-        // building.getComponent(UITransform).setContentSize(size(layout.shapeArray.reduce((previous, current) => {
-        //     return previous.length > current.length ? previous : current;
-        // }).length * BuildGameConfig.size, layout.shapeArray.length * BuildGameConfig.size));
-
         this.BuildingBindEvent(building, ui);
 
         return layout.builder.build(layout, building, layout.buildingDrag.getWorldPosition());
     }
 
     BuildingBindEvent(building: Node, ui: UI_Building) {
-        building.on(NodeEventType.TOUCH_START, ui.buildingTouchStart, ui);
-        building.on(NodeEventType.TOUCH_MOVE, ui.buildingTouchMove, ui);
-        building.on(NodeEventType.TOUCH_END, ui.buildingTouchEnd, ui);
-        building.on(NodeEventType.TOUCH_CANCEL, ui.buildingTouchCancel, ui);
+        building.on(NodeEventType.TOUCH_START, ui.buildingTouchStart, ui, true);
+        building.on(NodeEventType.TOUCH_MOVE, ui.buildingTouchMove, ui, true);
+        building.on(NodeEventType.TOUCH_END, ui.buildingTouchEnd, ui, true);
+        building.on(NodeEventType.TOUCH_CANCEL, ui.buildingTouchCancel, ui, true);
     }
 
     buildCheckVoid(layout, coord) {
@@ -79,14 +126,9 @@ export class Builder {
         let coord: Coordinate = BuildMapManager.getCoord(building.position.x + BuildGameConfig.size / 2, building.position.y + BuildGameConfig.size / 2);
 
         if (this.buildCheckVoid(layout, coord)) {
-            building.setPosition(BuildMapManager.getPos(coord).x - BuildGameConfig.size / 2, BuildMapManager.getPos(coord).y - BuildGameConfig.size / 2, 0);
+            building.setPosition(BuildMapManager.getPos(coord).x, BuildMapManager.getPos(coord).y, 0);
             BuildMapManager.place(coord.copy(), layout.buildingType, layout.shapeArray, building);
-            let maxDepth = 300;
-            this.newCoord = coord.copy();
-            visited.clear();
-            this.changeWall(layout, coord, layout.buildingType, 0, maxDepth, true);
-            visited.clear();
-            this.changeWall(layout, coord, layout.buildingType, 0, maxDepth, true);
+            this.drawAt(layout, coord, layout.buildingType, building)
             return true;
         } else {
             building.destroy();
@@ -95,487 +137,144 @@ export class Builder {
         }
     }
 
-    changeWall(layout: Layout_Building, coord: Coordinate, type: number, depth: number, maxDepth: number, doRecursion: boolean) {
+    // 在row行，col列绘制一个自动地图元件
+    drawAt(layout: Layout_Building, coord: Coordinate, type: number, building: Node) {
 
-        if (doRecursion) {
-            // 检查递归深度是否超过最大深度
-            if (depth > maxDepth) {
-                return;
+        for (const iterator of directions) {
+            const newX = coord.x + iterator.dx;
+            const newY = coord.y + iterator.dy;
+            // 判断row和col是否越界
+            if (newX < BuildGameConfig.row && newX >= 0 && newY < BuildGameConfig.col && newY >= 0) {
+                this.updateTileState(layout, newY, newX, type, building);
             }
+        }
+    }
+    drawTileIndex(layout: Layout_Building, row: number, col: number, index: number, building: Node) {
+        // 根据index得到对应的小元件表
+        let widget: number[] = autoTileMap[index]
+        // 根据小元件表拼接成地图元件
+        for (let index = 0; index < 4; index++) {
+            BuildMapManager.nodeMapDit[layout.buildingType][row][col].getChildByName('mapWidget').children[index].getComponent(Sprite).spriteFrame = layout.tileSet[widget[index]];
+        }
+    }
+    updateTileState(layout: Layout_Building, row: number, col: number, type: number, building: Node) {
 
-            // 生成唯一的键用于标记节点
-            const key = `${coord.x},${coord.y}`;
-            if (visited.has(key)) {
-                return;
-            }
-            visited.add(key);
-        }
+        log(`data: ${BuildMapManager.dataMapDit[type][row][col]}, row: ${row}, col: ${col}, change: ${BuildMapManager.dataMapDit[type][col][row]}`)
+        // 如果该位置没有地图元件，则直接返回
+        if (!this.hasTileAt(row, col, type)) return;
 
+        let state: number = 0b00000000;
 
-        let direction: { dir: number, node: Node, coord: Coordinate }[] = [
-            { dir: 0, node: null, coord: null },
-            { dir: 1, node: null, coord: null },
-            { dir: 1, node: null, coord: null },
-            { dir: 1, node: null, coord: null },
-        ]
-        for (let index = 0; index < directions.length; index++) {
-            const newX = coord.x + directions[index].dx;
-            const newY = coord.y + directions[index].dy;
-            let node = null;
-            if (newX < BuildGameConfig.row && newX >= 0 && newY < BuildGameConfig.col && newY >= 0 &&
-                BuildMapManager.dataMapDit[type][newY][newX] == BuildMapManager.dataMapDit[type][coord.y][coord.x]) {
-                direction[index].node = Coord(newX, newY).getNode(type);
-                direction[index].coord = Coord(newX, newY);
-            }
+        if (this.hasTileAt(row + 1, col, type)) {
+            state |= 0b01000000;
         }
-
-        // 记录有节点的方向
-        let up = direction[0].node !== null;
-        let down = direction[1].node !== null;
-        let left = direction[2].node !== null;
-        let right = direction[3].node !== null;
-
-        // 输出所有可能的组合
-        if (up && down && left && right) {
-            console.log('updownleftright');
-            coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-            coord.getNode(type).name = 'D';
+        if (this.hasTileAt(row - 1, col, type)) {
+            state |= 0b00000010;
         }
-        else if (up && down && left) {
-            console.log('updownleft');
-            coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-            coord.getNode(type).name = 'D';
+        if (this.hasTileAt(row, col - 1, type)) {
+            state |= 0b00010000;
         }
-        else if (up && down && right) {
-            console.log('updownright');
-            coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-            coord.getNode(type).name = 'D';
+        if (this.hasTileAt(row, col + 1, type)) {
+            state |= 0b00001000;
         }
-        else if (up && left && right) {
-            console.log('upleftright');
-            coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-            coord.getNode(type).name = 'D';
+        if (this.hasTileAt(row + 1, col - 1, type)) {
+            if ((state | 0b01010000) == state) state |= 0b10000000;
         }
-        else if (down && left && right) {
-            console.log('downleftright');
-            coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-            coord.getNode(type).name = 'D';
+        if (this.hasTileAt(row + 1, col + 1, type)) {
+            if ((state | 0b01001000) == state) state |= 0b00100000;
         }
-        else if (up && left) {
-            console.log('upleft');
-            if (!direction[2].coord.compare(this.newCoord)) {
-                if (direction[2].node.name.includes('D')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['BLU']];
-                    coord.getNode(type).name = 'RD';
-                }
-                else if (direction[2].node.name.includes('U')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['SLU']];
-                    coord.getNode(type).name = 'LU';
-                }
-                else {
-                    if (direction[0].node.name.includes('R')) {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['BLU']];
-                        coord.getNode(type).name = 'RD';
-                    }
-                    else if (direction[0].node.name.includes('L')) {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['SLU']];
-                        coord.getNode(type).name = 'LU';
-                    }
-                    else {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                        coord.getNode(type).name = 'D';
-                    }
-                }
-            }
-            else if (!direction[0].coord.compare(this.newCoord)) {
-                if (direction[0].node.name.includes('R')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['BLU']];
-                    coord.getNode(type).name = 'RD';
-                }
-                else if (direction[0].node.name.includes('L')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['SLU']];
-                    coord.getNode(type).name = 'LU';
-                }
-                else {
-                    if (direction[2].node.name.includes('D')) {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['BLU']];
-                        coord.getNode(type).name = 'RD';
-                    }
-                    else if (direction[2].node.name.includes('U')) {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['SLU']];
-                        coord.getNode(type).name = 'LU';
-                    }
-                    else {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                        coord.getNode(type).name = 'D';
-                    }
-                }
-            }
+        if (this.hasTileAt(row - 1, col - 1, type)) {
+            if ((state | 0b00010010) == state) state |= 0b00000100;
         }
-        else if (up && right) {
-            console.log('upright');
-            if (!direction[3].coord.compare(this.newCoord)) {
-                if (direction[3].node.name.includes('U')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['SRU']];
-                    coord.getNode(type).name = 'RU';
-                }
-                else if (direction[3].node.name.includes('D')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['BRU']];
-                    coord.getNode(type).name = 'LD';
-                }
-                else {
-                    if (direction[0].node.name.includes('L')) {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['BRU']];
-                        coord.getNode(type).name = 'LD';
-                    }
-                    else if (direction[0].node.name.includes('R')) {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['SRU']];
-                        coord.getNode(type).name = 'RU';
-                    }
-                    else {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                        coord.getNode(type).name = 'D';
-                    }
-                }
-            }
-            else if (!direction[0].coord.compare(this.newCoord)) {
-                if (direction[0].node.name.includes('L')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['BRU']];
-                    coord.getNode(type).name = 'LD';
-                }
-                else if (direction[0].node.name.includes('R')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['SRU']];
-                    coord.getNode(type).name = 'RU';
-                }
-                else {
-                    if (direction[3].node.name.includes('U')) {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['SRU']];
-                        coord.getNode(type).name = 'RU';
-                    }
-                    else if (direction[3].node.name.includes('D')) {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['BRU']];
-                        coord.getNode(type).name = 'LD';
-                    }
-                    else {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                        coord.getNode(type).name = 'D';
-                    }
-                }
-            }
-        }
-        else if (down && left) {
-            console.log('downleft');
-            if (!direction[2].coord.compare(this.newCoord)) {
-                if (direction[2].node.name.includes('U')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['BLD']];
-                    coord.getNode(type).name = 'RU';
-                }
-                else if (direction[2].node.name.includes('D')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['SLD']];
-                    coord.getNode(type).name = 'LD';
-                }
-                else {
-                    if (direction[1].node.name.includes('R')) {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['BLD']];
-                        coord.getNode(type).name = 'RU';
-                    }
-                    else if (direction[1].node.name.includes('L')) {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['SLD']];
-                        coord.getNode(type).name = 'LD';
-                    }
-                    else {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                        coord.getNode(type).name = 'D';
-                    }
-                }
-            }
-            else if (!direction[1].coord.compare(this.newCoord)) {
-                if (direction[1].node.name.includes('R')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['BLD']];
-                    coord.getNode(type).name = 'RU';
-                }
-                else if (direction[1].node.name.includes('L')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['SLD']];
-                    coord.getNode(type).name = 'LD';
-                }
-                else {
-                    if (direction[2].node.name.includes('U')) {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['BLD']];
-                        coord.getNode(type).name = 'RU';
-                    }
-                    else if (direction[2].node.name.includes('D')) {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['SLD']];
-                        coord.getNode(type).name = 'LD';
-                    }
-                    else {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                        coord.getNode(type).name = 'D';
-                    }
-                }
-            }
-        }
-        else if (down && right) {
-            console.log('downright');
-            if (!direction[3].coord.compare(this.newCoord)) {
-                if (direction[3].node.name.includes('U')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['BRD']];
-                    coord.getNode(type).name = 'LU';
-                }
-                else if (direction[3].node.name.includes('D')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['SRD']];
-                    coord.getNode(type).name = 'RD';
-                }
-                else {
-                    if (direction[1].node.name.includes('L')) {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['BRD']];
-                        coord.getNode(type).name = 'LU';
-                    }
-                    else if (direction[1].node.name.includes('R')) {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['SRD']];
-                        coord.getNode(type).name = 'RD';
-                    }
-                    else {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                        coord.getNode(type).name = 'D';
-                    }
-                }
-            }
-            else if (!direction[1].coord.compare(this.newCoord)) {
-                if (direction[1].node.name.includes('L')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['BRD']];
-                    coord.getNode(type).name = 'LU';
-                }
-                else if (direction[1].node.name.includes('R')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['SRD']];
-                    coord.getNode(type).name = 'RD';
-                }
-                else {
-                    if (direction[3].node.name.includes('U')) {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['BRD']];
-                        coord.getNode(type).name = 'LU';
-                    }
-                    else if (direction[3].node.name.includes('D')) {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['SRD']];
-                        coord.getNode(type).name = 'RD';
-                    }
-                    else {
-                        coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                        coord.getNode(type).name = 'D';
-                    }
-                }
-            }
+        if (this.hasTileAt(row - 1, col + 1, type)) {
+            if ((state | 0b00001010) == state) state |= 0b00000001;
         }
 
+        let index: number = 0;
 
-        else if (up && down) {
-            console.log('updown');
-            if (direction[0].coord.compare(this.newCoord)) {
-                if (direction[0].node.name.includes('L')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['L']];
-                    coord.getNode(type).name = 'L';
-                }
-                else if (direction[0].node.name.includes('R')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['R']];
-                    coord.getNode(type).name = 'R';
-                }
-                else {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['L']];
-                    coord.getNode(type).name = 'L';
-                }
-            }
-            else if (direction[1].coord.compare(this.newCoord)) {
-                if (direction[1].node.name.includes('L')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['L']];
-                    coord.getNode(type).name = 'L';
-                }
-                else if (direction[1].node.name.includes('R')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['R']];
-                    coord.getNode(type).name = 'R';
-                }
-                else {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['L']];
-                    coord.getNode(type).name = 'L';
-                }
-            }
-            else {
-                if (direction[0].node.name.includes('L')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['L']];
-                    coord.getNode(type).name = 'L';
-                }
-                else if (direction[0].node.name.includes('R')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['R']];
-                    coord.getNode(type).name = 'R';
-                }
-                else {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['L']];
-                    coord.getNode(type).name = 'L';
-                }
-
-            }
-        }
-        else if (left && right) {
-            console.log('leftright');
-            if (direction[2].node.name.includes('U') || direction[2].node.name.includes('D')) {
-                if (direction[2].node.name.includes('U')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['U']];
-                    coord.getNode(type).name = 'U';
-                }
-                else if (direction[2].node.name.includes('D')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                    coord.getNode(type).name = 'D';
-                }
-                else {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                    coord.getNode(type).name = 'D';
-                }
-            }
-            else if (direction[3].node.name.includes('U') || direction[3].node.name.includes('D')) {
-                if (direction[3].node.name.includes('U')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['U']];
-                    coord.getNode(type).name = 'U';
-                }
-                else if (direction[3].node.name.includes('D')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                    coord.getNode(type).name = 'D';
-                }
-                else {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                    coord.getNode(type).name = 'D';
-                }
-            }
-            else {
-                coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                coord.getNode(type).name = 'D';
-            }
-        }
-        else if (up && !down) {
-            console.log('up');
-            if (direction[0].node) {
-                if (direction[0].node.name.includes('L')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['LDE']];
-                    coord.getNode(type).name = 'L';
-                }
-                else if (direction[0].node.name.includes('R')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['RDE']];
-                    coord.getNode(type).name = 'R';
-                }
-                else if (direction[0].node.name.includes('LD') || direction[0].node.name.includes('RU')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['RDE']];
-                    coord.getNode(type).name = 'R';
-                }
-                else if (direction[0].node.name.includes('RD') || direction[0].node.name.includes('LU')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['LDE']];
-                    coord.getNode(type).name = 'L';
-                }
-                else {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                    coord.getNode(type).name = 'D';
-                }
-            }
-        }
-        else if (down && !up) {
-            console.log('down');
-            if (direction[1].node) {
-                if (direction[1].node.name.includes('L')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['LUE']];
-                    coord.getNode(type).name = 'L';
-                }
-                else if (direction[1].node.name.includes('R')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['RUE']];
-                    coord.getNode(type).name = 'R';
-                }
-                else if (direction[1].node.name.includes('RD') || direction[1].node.name.includes('RU')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['RDE']];
-                    coord.getNode(type).name = 'R';
-                }
-                else if (direction[1].node.name.includes('LD') || direction[1].node.name.includes('LU')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['LDE']];
-                    coord.getNode(type).name = 'L';
-                }
-                else {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['LUE']];
-                    coord.getNode(type).name = 'L';
-                }
-            } else {
-                coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['LUE']];
-                coord.getNode(type).name = 'L';
-            }
-        }
-        else if (left) {
-            console.log('left');
-            if (direction[2].node) {
-                if (direction[2].node.name.includes('U')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['U']];
-                    coord.getNode(type).name = 'U';
-                }
-                else if (direction[2].node.name.includes('D')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                    coord.getNode(type).name = 'D';
-                }
-                else if (direction[2].node.name.includes('R')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                    coord.getNode(type).name = 'D';
-                }
-                else if (direction[2].node.name.includes('L')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['U']];
-                    coord.getNode(type).name = 'U';
-                }
-                else {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                    coord.getNode(type).name = 'D';
-                }
-            } else {
-                coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                coord.getNode(type).name = 'D';
-            }
-        }
-        else if (right) {
-            console.log('right');
-            if (direction[3].node) {
-                if (direction[3].node.name.includes('U')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['U']];
-                    coord.getNode(type).name = 'U';
-                } else if (direction[3].node.name.includes('D')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                    coord.getNode(type).name = 'D';
-                } else if (direction[3].node.name.includes('L')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['U']];
-                    coord.getNode(type).name = 'U';
-                } else if (direction[3].node.name.includes('R')) {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['U']];
-                    coord.getNode(type).name = 'U';
-                }
-                else {
-                    coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                    coord.getNode(type).name = 'D';
-                }
-            }
-            else {
-                coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-                coord.getNode(type).name = 'D';
-            }
-        }
-        else {
-            console.log('没有节点');
-            coord.getNode(type).getChildByName('Sprite').getComponent(Sprite).spriteFrame = layout.spriteAtlas.getSpriteFrames()[BuildGameUtil.locationToSprite['D']];
-            coord.getNode(type).name = 'D';
+        switch (state) {
+            case 0b11111111: index = 0; break;
+            case 0b01111111: index = 1; break;
+            case 0b11011111: index = 2; break;
+            case 0b01011111: index = 3; break;
+            case 0b11111110: index = 4; break;
+            case 0b01111110: index = 5; break;
+            case 0b11011110: index = 6; break;
+            case 0b01011110: index = 7; break;
+            case 0b11111011: index = 8; break;
+            case 0b01111011: index = 9; break;
+            case 0b11011011: index = 10; break;
+            case 0b01011011: index = 11; break;
+            case 0b11111010: index = 12; break;
+            case 0b01111010: index = 13; break;
+            case 0b11011010: index = 14; break;
+            case 0b01011010: index = 15; break;
+            case 0b01101011: index = 16; break;
+            case 0b01001011: index = 17; break;
+            case 0b01101010: index = 18; break;
+            case 0b01001010: index = 19; break;
+            case 0b00011111: index = 20; break;
+            case 0b00011110: index = 21; break;
+            case 0b00011011: index = 22; break;
+            case 0b00011010: index = 23; break;
+            case 0b11010110: index = 24; break;
+            case 0b11010010: index = 25; break;
+            case 0b01010110: index = 26; break;
+            case 0b01010010: index = 27; break;
+            case 0b11111000: index = 28; break;
+            case 0b01111000: index = 29; break;
+            case 0b11011000: index = 30; break;
+            case 0b01011000: index = 31; break;
+            case 0b01000010: index = 32; break;
+            case 0b00011000: index = 33; break;
+            case 0b00001011: index = 34; break;
+            case 0b00001010: index = 35; break;
+            case 0b00010110: index = 36; break;
+            case 0b00010010: index = 37; break;
+            case 0b11010000: index = 38; break;
+            case 0b01010000: index = 39; break;
+            case 0b01101000: index = 40; break;
+            case 0b01001000: index = 41; break;
+            case 0b00000010: index = 42; break;
+            case 0b00001000: index = 43; break;
+            case 0b01000000: index = 44; break;
+            case 0b00010000: index = 45; break;
+            case 0b00000000: index = 46; break;
         }
 
-        if (doRecursion) {
-            // 对每个方向调用同样的 changeWall 方法进行递归处理，深度+1
-            direction.forEach(dir => {
-                if (dir.node !== null) {
-                    if (dir.coord !== null) {
-                        this.changeWall(layout, dir.coord, layout.buildingType, depth + 1, maxDepth, doRecursion);
-                    }
-                }
-            });
-        }
+        // log(col, row, index)
+
+        // 判断其周围8个格子的状态state
+        // 根据判断的状态确定情况的编号index
+        this.drawTileIndex(layout, row, col, index, building);
+    }
+
+    hasTileAt(row: number, col: number, type: number) {
+        if (col < BuildGameConfig.row && col >= 0 && row < BuildGameConfig.col && row >= 0) return BuildMapManager.dataMapDit[type][row][col] == 2;
+        else return false;
+
     }
 
     setBuildingScale(layout: Layout_Building, node: Node, sprite: Sprite) {
         node.setScale(v3(1, 1, 1))
         node.setScale(v3(layout.size.x / sprite.spriteFrame.originalSize.x,
             layout.size.y / sprite.spriteFrame.originalSize.y, 1))
+    }
+
+    public static cropSpriteFrame(sourceSpriteFrame: SpriteFrame, cropRect: Rect): SpriteFrame {
+        // 创建一个新的 SpriteFrame
+        const croppedSpriteFrame = new SpriteFrame();
+
+        // 设置新的 SpriteFrame 使用的原始纹理
+        croppedSpriteFrame.texture = sourceSpriteFrame.texture;
+
+        // 设置裁剪区域
+        croppedSpriteFrame.rect = cropRect;
+
+        // 设置原点和偏移（如果有必要）
+        croppedSpriteFrame.offset = v2(0, 0); // 根据需求调整
+        croppedSpriteFrame.originalSize = cropRect.size;
+
+        return croppedSpriteFrame;
     }
 }

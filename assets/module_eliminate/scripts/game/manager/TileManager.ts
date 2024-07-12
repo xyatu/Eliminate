@@ -148,7 +148,7 @@ export default class TileManager extends Component {
 
     private autoFall() {
         let c = Math.floor(math.randomRange(0, GameConfig.col));
-        if (this.getType(new Coordinate(c, GameConfig.row - 1))) {
+        if (this.getType(new Coordinate(c, GameConfig.row - 1)) && this.getType(new Coordinate(c, GameConfig.row - 1)) != TileType.Z) {
             EliminateState.onGameOverEvent();
         }
         else {
@@ -508,7 +508,7 @@ export default class TileManager extends Component {
                                                     try {
                                                         this.getTile(c, r).node.setPosition(v3(MapManager.getPos(c, r).x, MapManager.getPos(c, r).y, 0))
                                                     } catch (error) {
-                                                        
+
                                                     }
                                                 }
                                             }

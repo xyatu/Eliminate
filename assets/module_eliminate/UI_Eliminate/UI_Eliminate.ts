@@ -1,8 +1,9 @@
-import { _decorator, Component, game, Game, log, Node } from 'cc';
-import { tgxUIController } from '../../core_tgx/tgx';
+import { _decorator, AssetManager, assetManager, Component, director, game, Game, log, Node } from 'cc';
+import { tgxUIController, tgxUIMgr } from '../../core_tgx/tgx';
 import { GameUILayers } from '../../scripts/GameUILayers';
 import { Layout_Eliminate } from './Layout_Eliminate';
 import { ModuleDef } from '../../scripts/ModuleDef';
+import { SceneDef } from '../../scripts/SceneDef';
 const { ccclass, property } = _decorator;
 
 const BundleName = ModuleDef.GAME_ELIMINATE;
@@ -24,6 +25,16 @@ export class UI_Eliminate extends tgxUIController {
         layout.cbChangeScoreEvent = (score)=>{
             layout.score.string = `得分: ${score}`;
         }
+
+        this.onButtonEvent('Back',()=>{
+            assetManager.loadBundle(ModuleDef.GAME_BUILD, (err, bundle: AssetManager.Bundle) => {
+                if (bundle) {
+                    director.loadScene(SceneDef.BUILD_GAME, () => {
+                        tgxUIMgr.inst.hideAll();
+                    });
+                }
+            });
+        })
     }
 }
 

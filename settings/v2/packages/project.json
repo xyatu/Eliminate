@@ -16,6 +16,14 @@
     {
       "name": "Default",
       "value": 1
+    },
+    {
+      "name": "character",
+      "value": 2
+    },
+    {
+      "name": "map",
+      "value": 4
     }
   ],
   "custom_joint_texture_layouts": []

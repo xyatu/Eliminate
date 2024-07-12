@@ -14,10 +14,15 @@ export class Layout_Building extends Component {
     @property(Prefab)
     buildingShow: Prefab = null;
 
-    @property(SpriteAtlas)
-    spriteAtlas: SpriteAtlas = null;
+    @property(SpriteFrame)
+    autoTileSet: SpriteFrame = null;
 
-    shape: string = '1';
+    @property(Node)
+    test: Node = null;
+
+    shape: string = '2';
+
+    tileSet: SpriteFrame[] = [];
 
     shapeArray: number[][] = [];
 
@@ -36,6 +41,18 @@ export class Layout_Building extends Component {
     builder: Builder = new Builder();
 
     size: Size = new Size();
+
+    count: number = 0;
+
+    showUI(){
+        for (let index = 0; index < this.tileSet.length; index++) {
+            this.test.children[index].getComponent(Sprite).spriteFrame = this.tileSet[index];
+        }
+        this.test.children[0].getComponent(Sprite).spriteFrame = this.tileSet[16];
+        this.test.children[1].getComponent(Sprite).spriteFrame = this.tileSet[17];
+        this.test.children[6].getComponent(Sprite).spriteFrame = this.tileSet[46];
+        this.test.children[7].getComponent(Sprite).spriteFrame = this.tileSet[47];
+    }
 
 }
 

@@ -6,7 +6,7 @@ import { ModuleDef } from '../scripts/ModuleDef';
 import { SceneDef } from '../scripts/SceneDef';
 const { ccclass, property } = _decorator;
 
-const _preloadBundles = [ModuleDef.BASIC];
+const _preloadBundles = [ModuleDef.BASIC, ModuleDef.GAME_BUILD];
 
 const _preloadRes = [
     { bundle: ModuleDef.BASIC, url: 'ui_alert/UI_Alert', type: 'prefab' },
@@ -79,11 +79,16 @@ export class Start extends Component {
     }
 
     onPreloadingComplete() {
-        let bundle = assetManager.getBundle(ModuleDef.BASIC);
-        bundle.preloadScene(SceneDef.MAIN_MENU, () => {
+        let bundle = assetManager.getBundle(ModuleDef.GAME_BUILD);
+        bundle.preloadScene(SceneDef.BUILD_GAME, () => {
             this.onResLoaded();
-            director.loadScene(SceneDef.MAIN_MENU);
+            director.loadScene(SceneDef.BUILD_GAME);
         });
+        // let bundle = assetManager.getBundle(ModuleDef.BASIC);
+        // bundle.preloadScene(SceneDef.MAIN_MENU, () => {
+        //     this.onResLoaded();
+        //     director.loadScene(SceneDef.MAIN_MENU);
+        // });
     }
 
     update(deltaTime: number) {

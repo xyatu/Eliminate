@@ -35,7 +35,7 @@ export class EliminateState extends Component {
         EliminateState.inst.isGameOver = true;
         tgxUIAlert.show('游戏结束', false).onClick((isok: Boolean)=>{
             if(isok){
-                director.loadScene(SceneDef.MAIN_MENU);
+                director.loadScene(SceneDef.BUILD_GAME);
             }
         })
     }

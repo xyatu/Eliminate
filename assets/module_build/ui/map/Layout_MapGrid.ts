@@ -25,8 +25,24 @@ export class Layout_MapGrid extends Component {
 
     private static beginY: number = null;
 
+    public cbOnChangeScale: Function;
+
+    public cbOnBuildModeChange: Function;
+
     protected onLoad(): void {
         Layout_MapGrid.inst = this;
+    }
+
+    public onChangeScale(event: boolean){
+        if(this.cbOnChangeScale){
+            this.cbOnChangeScale(event);
+        }
+    }
+
+    public onBuildModeChange(event: boolean){
+        if(this.cbOnBuildModeChange){
+            this.cbOnBuildModeChange(event);
+        }
     }
 
     protected start(): void {

@@ -6,27 +6,19 @@ export default class BuildGameUtil {
     public static locationToSprite: { [key: string]: number } = {};
 
     public static initWallMap(){
-        this.locationToSprite['D'] = 1;
-        this.locationToSprite['R'] = 11;
-        this.locationToSprite['RUE'] = 15;
-        this.locationToSprite['RDE'] = 26;
-        this.locationToSprite['L'] = 13;
-        this.locationToSprite['LUE'] = 14;
-        this.locationToSprite['LDE'] = 25;
-        this.locationToSprite['U'] = 23;
+        this.locationToSprite['Default'] = 0;
+        this.locationToSprite['Full'] = 1;
 
+        this.locationToSprite['U'] = 2;
+        this.locationToSprite['D'] = 3;
+        this.locationToSprite['L'] = 4;
+        this.locationToSprite['R'] = 5;
 
-        this.locationToSprite['SLU'] = 24;
-        this.locationToSprite['BLU'] = 21;
-
-        this.locationToSprite['SLD'] = 2;
-        this.locationToSprite['BLD'] = 10;
-
-        this.locationToSprite['SRD'] = 0;
-        this.locationToSprite['BRD'] = 9;
-
-        this.locationToSprite['SRU'] = 22;
-        this.locationToSprite['BRU'] = 20;
+        this.locationToSprite['LU'] = 6;
+        this.locationToSprite['RU'] = 7;
+        this.locationToSprite['LD'] = 8;
+        this.locationToSprite['RD'] = 9;
+        
     }
 
     public static nodeIsInsideTargetArea(node: Node, targetArea: Node): boolean {
