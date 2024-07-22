@@ -1,14 +1,14 @@
 import { _decorator, Component, Animation, sp, Sprite, animation, log } from 'cc';
-import { AnimationController } from './AnimationController';
-import { Layout_CharacterManager } from '../manager/CharacterManager/Layout_CharacterManager';
+import { CharacterState } from './CharacterState';
+import { RoleAnim } from './RoleAnim';
 const { ccclass, property } = _decorator;
 
 export enum Direction {
-    None,
     Up,
     Down,
     Left,
     Right,
+    None,
 }
 
 @ccclass('CharacterFSM')
@@ -24,8 +24,8 @@ export class CharacterFSM extends Component {
     }
 
     playAnimationForDirection(direction: Direction) {
-        if (Layout_CharacterManager.isMoving) return;
-        let animation: AnimationController = this.node.getComponent(AnimationController);
+        if (this.node.getComponent(CharacterState).isMoving) return;
+        let animation: RoleAnim = this.node.getComponent(RoleAnim);
         switch (direction) {
             case Direction.Up:
                 break;
@@ -38,7 +38,7 @@ export class CharacterFSM extends Component {
             default:
                 break;
         }
-        animation.playAnimationForDirection(direction);
+        animation.playAnimForDire(direction);
     }
 
     protected start(): void {

@@ -2,7 +2,6 @@ import { _decorator, Component, Node, Vec2, v2, Prefab, Vec3, log } from 'cc';
 import { EasyController, EasyControllerEvent } from './EasyController';
 import { CharacterFSM, Direction } from './CharacterFSM';
 import { GridMovement } from './GridMovement';
-import { Layout_CharacterManager } from '../manager/CharacterManager/Layout_CharacterManager';
 import BuildGameConfig from '../data/BuildGameConfig';
 const { ccclass, property } = _decorator;
 
@@ -51,6 +50,7 @@ export class CharacterMovement2D extends Component {
 
     onMovementStop() {
         this._moveFactor = 0;
+        this.node.getComponent(GridMovement).CharacterMove(Direction.None);
     }
 
     onDestroy() {

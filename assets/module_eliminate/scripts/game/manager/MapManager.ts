@@ -10,7 +10,7 @@ export default class MapManager {
         if (typeof x === 'number') return this._posMap[x][y];
         else return this._posMap[x.x][x.y];
     }
-    
+
     public static getPosArr(): Vec2[][] {
         return this._posMap;
     }
@@ -53,6 +53,8 @@ export default class MapManager {
             }
             this._posMap.push(colSet);
         }
+
+        log(this._posMap);
     }
-    
+
 }

@@ -1,10 +1,13 @@
-import { _decorator, Component, Label, Node } from 'cc';
+import { _decorator, Component, Label, Node, Prefab } from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('Layout_Eliminate')
 export class Layout_Eliminate extends Component {
-    @property(Label)
-    score: Label = null;
+    @property(Prefab)
+    scorePrefab: Prefab = null;
+
+    @property(Node)
+    scoreBox: Node = null;
 
     private static instance: Layout_Eliminate = null;
 
@@ -12,10 +15,10 @@ export class Layout_Eliminate extends Component {
 
     protected onLoad(): void {
         Layout_Eliminate.instance = this;
-        this.score.string = `得分： ${0}`
+
     }
 
-    public static changeScore(score: number){
+    public static changeScore(score: number) {
         Layout_Eliminate.instance.onChangeScoreEvent(score);
     }
 

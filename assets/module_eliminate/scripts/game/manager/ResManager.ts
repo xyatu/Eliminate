@@ -22,6 +22,21 @@ export default class ResManager extends Component {
     private e: SpriteFrame | null = null;
 
     @property(SpriteFrame)
+    private f: SpriteFrame | null = null;
+
+    @property(SpriteFrame)
+    private g: SpriteFrame | null = null;
+
+    @property(SpriteFrame)
+    private h: SpriteFrame | null = null;
+
+    @property(SpriteFrame)
+    private i: SpriteFrame | null = null;
+
+    @property(SpriteFrame)
+    private j: SpriteFrame | null = null;
+
+    @property(SpriteFrame)
     private ver: SpriteFrame | null = null;
 
     @property(SpriteFrame)
@@ -51,6 +66,16 @@ export default class ResManager extends Component {
                 return this.instance.d;
             case TileType.E:
                 return this.instance.e;
+            case TileType.F:
+                return this.instance.f;
+            case TileType.G:
+                return this.instance.g;
+            case TileType.H:
+                return this.instance.h;
+            case TileType.I:
+                return this.instance.i;
+            case TileType.J:
+                return this.instance.j;
             case TileType.Ver:
                 return this.instance.ver;
             case TileType.Hori:

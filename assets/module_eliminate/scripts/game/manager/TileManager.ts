@@ -40,6 +40,11 @@ export default class TileManager extends Component {
 
     private static instance: TileManager = null; // 实例
 
+    // autoFallInterval: number = 0.1;
+    autoFallInterval: number = GameConfig.autoFallInterval;
+
+    timeTick: number = 0;
+
     public static getmapContainer() {
         return TileManager.instance.mapContainer;
     }
@@ -48,7 +53,7 @@ export default class TileManager extends Component {
         TileManager.instance = this;
         this.bindTouchEvent();
         // 开始自动下落
-        this.schedule(this.autoFall, GameConfig.autoFallInterval)
+        this.schedule(this.autoFall, this.autoFallInterval)
     }
 
     protected start(): void {
@@ -99,6 +104,19 @@ export default class TileManager extends Component {
     // private checkTimeTick: number = 0;
     update(dt) {
         this.falldown();
+
+        this.changeFallInterval(dt);
+    }
+
+    changeFallInterval(dt) {
+        if (this.autoFallInterval > 0.5) {
+            this.timeTick += dt;
+            if (this.timeTick >= GameConfig.changeFallIntervalval) {
+                this.timeTick -= GameConfig.changeFallIntervalval;
+                this.autoFallInterval -= 0.2;
+                if (this.autoFallInterval < 0.5) this.autoFallInterval = 0.5;
+            }
+        }
     }
 
     /**
@@ -115,8 +133,7 @@ export default class TileManager extends Component {
             if (targetCoord) {
                 // log(this.selectedCoord.toString(), targetCoord.toString())
                 if (this.selectedCoord.x != targetCoord.x || this.selectedCoord.y != targetCoord.y) {
-                    this.exchangeTiles(this.selectedCoord, targetCoord).then(() => {
-                    })
+                    this.exchangeTiles(this.selectedCoord, targetCoord).then(() => { })
                     this.tileTouchStartPos = pos;
                     this.setSelectedTile(targetCoord);
                 }
@@ -487,6 +504,8 @@ export default class TileManager extends Component {
                         }
                         // 找到可以用的方块
                         if (this.getType(c, nr)) {
+                            this.getTile(c, nr).isFalling = true;
+
                             // 转移数据
                             this.setType(c, r, this.getType(c, nr));
                             this.setTile(c, r, this.getTile(c, nr));
@@ -506,6 +525,7 @@ export default class TileManager extends Component {
                                             for (let r = 0; r < GameConfig.row; r++) {
                                                 if (this.getType(c, r)) {
                                                     try {
+                                                        this.getTile(c, nr).isFalling = false;
                                                         this.getTile(c, r).node.setPosition(v3(MapManager.getPos(c, r).x, MapManager.getPos(c, r).y, 0))
                                                     } catch (error) {
 

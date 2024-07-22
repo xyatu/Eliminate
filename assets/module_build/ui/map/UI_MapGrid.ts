@@ -1,13 +1,25 @@
-import { _decorator, Camera, Component, EventMouse, EventTouch, find, instantiate, Layout, log, Node, NodeEventType, size, UITransform, v3, Vec2 } from 'cc';
-import { tgxUIController } from '../../../core_tgx/tgx';
+import { _decorator, Camera, clamp, Component, director, EventMouse, EventTouch, find, instantiate, Layout, log, Node, NodeEventType, size, tween, UITransform, v2, v3, Vec2, Vec3, view } from 'cc';
+import { tgxUIAlert, tgxUIController } from '../../../core_tgx/tgx';
 import { GameUILayers } from '../../../scripts/GameUILayers';
 import { Layout_MapGrid } from './Layout_MapGrid';
 import BuildGameConfig from '../../script/data/BuildGameConfig';
-import { Coordinate } from '../../../module_eliminate/scripts/game/type/DataStructure';
+import { Coord, Coordinate } from '../../../module_eliminate/scripts/game/type/DataStructure';
+import BuildMapManager from '../../script/manager/BuildMapManager';
+import BuildGameUtil from '../../script/BuildGameUtil';
+import { UI_Building } from '../ui_building/UI_Building';
+import { Layout_BuildFrame } from '../ui_buildFrame/Layout_BuildFrame';
+import { BuilderComp } from '../../script/manager/BuilderComp';
+import { CharacterManager } from '../../script/manager/CharacterManager';
+import { GameManager, PlayerState } from '../../../start/GameManager';
+import { CharacterState } from '../../script/character/CharacterState';
 const { ccclass, property } = _decorator;
 
 @ccclass('Map')
 export class UI_MapGrid extends tgxUIController {
+
+    originalTouchDistance: number = -1;
+
+    originalNodeScale: Vec3 = null;
 
     constructor() {
         super('ui/map/UI_MapGrid', GameUILayers.GAME, Layout_MapGrid);
@@ -20,73 +32,122 @@ export class UI_MapGrid extends tgxUIController {
     protected onCreated(): void {
         let layout = this.layout as Layout_MapGrid;
 
-        layout.node.getComponent(UITransform).setContentSize(size(BuildGameConfig.row * BuildGameConfig.size, BuildGameConfig.col * BuildGameConfig.size));
-        layout.grid.node.getComponent(UITransform).setContentSize(size(BuildGameConfig.row * BuildGameConfig.size, BuildGameConfig.col * BuildGameConfig.size));
+        layout.node.getComponent(UITransform).setContentSize(size(GameManager.inst.playerState.mapRow * BuildGameConfig.size, GameManager.inst.playerState.mapCol * BuildGameConfig.size));
+        layout.grid.node.getComponent(UITransform).setContentSize(size(GameManager.inst.playerState.mapRow * BuildGameConfig.size, GameManager.inst.playerState.mapCol * BuildGameConfig.size));
 
-        for (let index = 0; index < BuildGameConfig.row * BuildGameConfig.col; index++) {
+        for (let index = 0; index < GameManager.inst.playerState.mapRow * GameManager.inst.playerState.mapCol; index++) {
             instantiate(layout.cell).setParent(layout.grid.node);
         }
 
-        for (let index = 0; index < BuildGameConfig.layers; index++) {
+        for (let index = BuildGameConfig.buttomLayer; index < BuildGameConfig.buttomLayer + BuildGameConfig.layers; index++) {
             let layer: Node = instantiate(layout.layer);
             this.node.addChild(layer);
-            layer.setPosition(0, 0, index);
+            layer.setPosition(0, 0, index * 100);
             layer.name = index.toString();
         }
 
-        layout.cbOnChangeScale = (event: boolean) => {
-            let scaleVal = event ? 0.01 : -0.01
-            let newX = layout.node.scale.x + scaleVal;
-            if (newX < 0.3) newX = 0.3;
-            else if (newX > 2) newX = 2;
-            let newY = layout.node.scale.y + scaleVal;
-            if (newY < 0.3) newY = 0.3;
-            else if (newY > 2) newY = 2;
-            layout.node.setWorldScale(newX, newY, layout.node.scale.z);
-        }
+        layout.initFinish = true;
 
-        layout.cbOnBuildModeChange = (event: boolean) => {
-            if (event) {
-                find('Canvas').on(NodeEventType.TOUCH_MOVE, this.touchMove, this, true);
-                find('Canvas').on(NodeEventType.MOUSE_WHEEL, this.mouseWheel, this, true);
-            }
-            else {
-                find('Canvas').off(NodeEventType.TOUCH_MOVE, this.touchMove, this, true);
-                find('Canvas').off(NodeEventType.MOUSE_WHEEL, this.mouseWheel, this, true);
-            }
-        }
+        layout.cbOnChangeScale = this.onChangeScale;
+
+        layout.cbOnFollow = this.onFollow;
+
+        layout.cbOnBuild = this.onBuild;
+
+        this.node.on(NodeEventType.TOUCH_MOVE, this.touchMove, this, true);
+        this.node.on(NodeEventType.TOUCH_END, this.touchEnd, this, true);
+        this.node.on(NodeEventType.MOUSE_WHEEL, this.mouseWheel, this, true);
+
+        let coord: Coordinate = GameManager.inst.playerState.playerCoord;
+        if (!coord) coord = Coord(Math.floor(GameManager.inst.playerState.mapCol / 2), Math.floor(GameManager.inst.playerState.mapRow / 2));
+        CharacterManager.createCharacter(true, coord);
+
+        this.onFollow(0.01, v2(-BuildMapManager.getPos(coord).x + BuildGameConfig.size / 2, -BuildMapManager.getPos(coord).y))
     }
 
     touchMove(event: EventTouch) {
-        this.dragShow(event);
+        if (BuilderComp.inst.selectedBuilding) return;
+
+        let touches = event.getTouches();
+        if (touches.length >= 2) {
+            let temp = v2();
+            Vec2.subtract(temp, touches[0].getLocation(), touches[1].getLocation());
+            // 双指当前间距
+            let distance = temp.length();
+            if (this.originalTouchDistance == -1) {
+                // 双指初始间距
+                this.originalTouchDistance = distance;
+                // 节点初始缩放
+                this.originalNodeScale = this.node.scale.clone();
+
+            }
+            let targetScale = v3();
+            // 双指当前间距 / 双指初始间距
+            let scale = distance / this.originalTouchDistance;
+            // 节点初始缩放 * (双指当前间距 / 双指初始间距)
+            Vec3.multiplyScalar(targetScale, this.originalNodeScale, scale);
+            scale = targetScale.x;
+            // 属于节点缩放比
+            scale = clamp(scale, BuildGameConfig.mapMinScale, BuildGameConfig.mapMaxScale);
+            this.node.setScale(scale, scale, scale);
+        } else if (event.getTouches().length === 1) {
+            BuildGameUtil.dragShow(event);
+        }
+    }
+
+    touchEnd() {
+        let layout = this.layout as Layout_MapGrid;
+
+        layout.isTouch = false;
+        layout.touchTime = 0;
+        // layout.isSelect = false;
     }
 
     mouseWheel(event: EventMouse) {
-        this.layout.onChangeScale(event.getScrollY() > 0);
+        Layout_MapGrid.inst.onChangeScale(event.getScrollY() > 0);
     }
 
-    dragShow(event: EventTouch) {
-        let layout = this.layout as Layout_MapGrid;
-        const delta = event.getDelta();
-        let newPos = v3(layout.node.getPosition().x + delta.x, layout.node.getPosition().y + delta.y, layout.node.getPosition().z)
-        layout.node.setPosition(newPos);
+    onChangeScale(event: boolean) {
+        let scaleVal = event ? BuildGameConfig.scaleVal : -BuildGameConfig.scaleVal;
+        let newX = this.node.scale.x + scaleVal;
+        if (newX < BuildGameConfig.mapMinScale) newX = BuildGameConfig.mapMinScale;
+        else if (newX > BuildGameConfig.mapMaxScale) newX = BuildGameConfig.mapMaxScale;
+        let newY = this.node.scale.y + scaleVal;
+        if (newY < BuildGameConfig.mapMinScale) newY = BuildGameConfig.mapMinScale;
+        else if (newY > BuildGameConfig.mapMaxScale) newY = BuildGameConfig.mapMaxScale;
+        this.node.setWorldScale(newX, newY, this.node.scale.z);
 
-        if (event.getTouches().length === 2) {
-            const touches = event.getTouches();
-            const touch1 = touches[0].getLocation();
-            const touch2 = touches[1].getLocation();
-            const preTouch1 = touches[0].getPreviousLocation();
-            const preTouch2 = touches[1].getPreviousLocation();
-            const currentDistance = Vec2.distance(touch1, touch2);
-            const preDistance = Vec2.distance(preTouch1, preTouch2);
+    }
 
-            if (currentDistance > preDistance) {
-                layout.onChangeScale(true);
-            }
-            else if (currentDistance < preDistance) {
-                layout.onChangeScale(false);
-            }
+    onFollow(moveTime: number, pos: Vec2) {
+        let minx = BuildMapManager.getPos(0, 0).x - BuildGameConfig.size / 2;
+        let miny = BuildMapManager.getPos(0, 0).y - BuildGameConfig.size / 2;
+        let maxx = BuildMapManager.getPos(GameManager.inst.playerState.mapCol - 1, GameManager.inst.playerState.mapRow - 1).x + BuildGameConfig.size / 2;
+        let maxy = BuildMapManager.getPos(GameManager.inst.playerState.mapCol - 1, GameManager.inst.playerState.mapRow - 1).y + BuildGameConfig.size / 2;
+
+        // log(`pos: ${pos}, minx: ${cameraminx}, miny: ${cameraminy}, maxx: ${cameramaxx}, maxy: ${cameramaxy}, judge: ${pos.x <= cameraminx || pos.x >= cameramaxx || pos.y <= cameraminy || pos.y >= cameramaxy}`)
+
+        if (pos.x <= minx || pos.x >= maxx) {
+            tween(this.node)
+                .to(moveTime, { position: v3(this.node.position.x, pos.y, this.node.position.z) })
+                .start();
         }
+        else if (pos.y <= miny || pos.y >= maxy) {
+            tween(this.node)
+                .to(moveTime, { position: v3(pos.x, this.node.position.y, this.node.position.z) })
+                .start();
+        } else {
+            tween(this.node)
+                .to(moveTime, { position: v3(pos.x, pos.y, this.node.position.z) })
+                .start();
+        }
+    }
+
+    onBuild(ui: UI_Building) {
+        // let layout = ui.layout as Layout_Building;
+        // if (BuildGameUtil.nodeIsInsideTargetArea(layout.buildingDrag, this.node)) {
+        //     layout.builder.buildBuilding(layout);
+        // }
     }
 }
 

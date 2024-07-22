@@ -1,4 +1,4 @@
-import { _decorator, Node, EventTouch, Touch, Component, UITransform, Input, EventKeyboard, KeyCode, v2, Vec3, input, Scene, director, EventMouse, macro, view, screen } from 'cc';
+import { _decorator, Node, EventTouch, Touch, Component, UITransform, Input, EventKeyboard, KeyCode, v2, Vec3, input, Scene, director, EventMouse, macro, view, screen, log, v3 } from 'cc';
 import { EasyControllerEvent } from './EasyController';
 const { ccclass, property } = _decorator;
 
@@ -20,8 +20,8 @@ const { ccclass, property } = _decorator;
 @ccclass('tgxUI_Joystick')
 export class UI_Joystick extends Component {
 
-    private static _inst:UI_Joystick = null;
-    public static get inst():UI_Joystick{
+    private static _inst: UI_Joystick = null;
+    public static get inst(): UI_Joystick {
         return this._inst;
     }
 
@@ -38,6 +38,8 @@ export class UI_Joystick extends Component {
     private _cameraTouchB: Touch = null;
 
     private _scene: Scene = null;
+
+    private _originCtrlPos: Vec3 = new Vec3();
 
     protected onLoad(): void {
         UI_Joystick._inst = this;
@@ -60,12 +62,13 @@ export class UI_Joystick extends Component {
         this._checkerCamera = checkerCamera;
 
         this._ctrlRoot = this.node.getChildByName('ctrl').getComponent(UITransform);
-        this._ctrlRoot.node.active = false;
+        this._ctrlRoot.node.active = true;
         this._ctrlPointer = this._ctrlRoot.node.getChildByName('pointer');
+        this._originCtrlPos = this.node.getChildByName('ctrl').position.clone();
 
         input.on(Input.EventType.KEY_DOWN, this.onKeyDown, this);
         input.on(Input.EventType.KEY_UP, this.onKeyUp, this);
-        input.on(Input.EventType.MOUSE_WHEEL,this.onMouseWheel, this);
+        input.on(Input.EventType.MOUSE_WHEEL, this.onMouseWheel, this);
 
         this._scene = director.getScene();
     }
@@ -73,7 +76,7 @@ export class UI_Joystick extends Component {
     onDestroy() {
         input.off(Input.EventType.KEY_DOWN, this.onKeyDown, this);
         input.off(Input.EventType.KEY_UP, this.onKeyUp, this);
-        input.off(Input.EventType.MOUSE_WHEEL,this.onMouseWheel, this);
+        input.off(Input.EventType.MOUSE_WHEEL, this.onMouseWheel, this);
 
         UI_Joystick._inst = null;
     }
@@ -151,12 +154,18 @@ export class UI_Joystick extends Component {
             if (this._movementTouch && touch.getID() == this._movementTouch.getID()) {
                 this._scene.emit(EasyControllerEvent.MOVEMENT_STOP);
                 this._movementTouch = null;
-                this._ctrlRoot.node.active = false;
+                // this._ctrlRoot.node.active = true;
+                this.resetCtrl(this.node.getChildByName('ctrl'), this._originCtrlPos);
             }
         }
     }
 
-
+    resetCtrl(node: Node, pos: Vec3) {
+        node.setPosition(pos);
+        for (const iterator of node.children) {
+            if (iterator) this.resetCtrl(iterator, Vec3.ZERO);
+        }
+    }
 
     private getDistOfTwoTouchPoints(): number {
         let touchA = this._cameraTouchA;
@@ -168,7 +177,7 @@ export class UI_Joystick extends Component {
         let dy = touchB.getLocationY() - touchB.getLocationY();
         return Math.sqrt(dx * dx + dy * dy);
     }
-    
+
     private onTouchStart_CameraCtrl(event: EventTouch) {
         let touches = event.getAllTouches();
         this._cameraTouchA = null;
@@ -271,15 +280,15 @@ export class UI_Joystick extends Component {
         }
     }
 
-    onMouseWheel(event:EventMouse){
+    onMouseWheel(event: EventMouse) {
         let delta = event.getScrollY() * 0.1;
         console.log(delta);
         this._scene.emit(EasyControllerEvent.CAMERA_ZOOM, delta);
     }
 
-    onButtonSlot(event){
+    onButtonSlot(event) {
         let btnName = event.target.name;
-        this._scene.emit(EasyControllerEvent.BUTTON,btnName);
+        this._scene.emit(EasyControllerEvent.BUTTON, btnName);
     }
 
     private _key2dirMap = null;

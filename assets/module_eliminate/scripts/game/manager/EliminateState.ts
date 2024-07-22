@@ -1,7 +1,10 @@
-import { _decorator, Component, director, Node, view } from 'cc';
+import { _decorator, Component, director, instantiate, log, Node, Prefab, view } from 'cc';
 import GameUtil from '../util/GameUtil';
-import { tgxUIAlert, tgxUIMgr, tgxUIWaiting } from '../../../../core_tgx/tgx';
+import { tgxUIAlert, tgxUIController, tgxUIMgr, tgxUIWaiting } from '../../../../core_tgx/tgx';
 import { SceneDef } from '../../../../scripts/SceneDef';
+import { GameManager } from '../../../../start/GameManager';
+import { UI_OverComp as UI_OverComp } from '../component/UI_OverComp';
+import { SlotConfig } from '../../../../start/SlotConfig';
 const { ccclass, property } = _decorator;
 
 @ccclass('EliminateState')
@@ -33,17 +36,24 @@ export class EliminateState extends Component {
 
     private gameOver() {
         EliminateState.inst.isGameOver = true;
-        tgxUIAlert.show('游戏结束', false).onClick((isok: Boolean)=>{
-            if(isok){
-                director.loadScene(SceneDef.BUILD_GAME);
-            }
-        })
+        let gold = EliminateState.inst.score;
+
+        GameManager.inst.onGoldChange(gold);
+        EliminateState.inst.saveGold();
+
+        let over: UI_OverComp = tgxUIMgr.inst.showUI(UI_OverComp, () => {
+            over.initUI(EliminateState.inst.score);
+        });
     }
 
     public static onGameOverEvent(event?: any) {
         if (EliminateState.inst.cbGameOverEvent.length > 0) {
             EliminateState.inst.cbGameOverEvent.forEach(cbGameOverEvent => cbGameOverEvent(event));
         }
+    }
+
+    saveGold() {
+        localStorage.setItem(SlotConfig.slot_gold, GameManager.inst.playerState.gold.toString());
     }
 }
 

@@ -1,12 +1,14 @@
-import { _decorator, assetManager, Component, director, game, Label, Prefab, Node } from 'cc';
+import { _decorator, assetManager, Component, director, game, Label, Prefab, Node, log, SpriteAtlas, warn } from 'cc';
 import { tgxModuleContext, tgxUIMgr } from '../core_tgx/tgx';
 import { GameUILayers, GameUILayerNames } from '../scripts/GameUILayers';
 
 import { ModuleDef } from '../scripts/ModuleDef';
 import { SceneDef } from '../scripts/SceneDef';
+import { Res } from './Res';
+import { DataGetter } from './DataGetter';
 const { ccclass, property } = _decorator;
 
-const _preloadBundles = [ModuleDef.BASIC, ModuleDef.GAME_BUILD];
+const _preloadBundles = [ModuleDef.BASIC, ModuleDef.GAME_BUILD, ModuleDef.GAME_ELIMINATE];
 
 const _preloadRes = [
     { bundle: ModuleDef.BASIC, url: 'ui_alert/UI_Alert', type: 'prefab' },
@@ -27,6 +29,10 @@ export class Start extends Component {
     @property(Node)
     loadingBar: Node;
 
+    isDone: boolean = false;
+
+    isLoadScene: boolean = false;
+
     private _percent: string = '';
     private _numCurrentLoaded = 0;
     start() {
@@ -34,6 +40,8 @@ export class Start extends Component {
 
         game.frameRate = 61;
         tgxUIMgr.inst.setup(this.uiCanvasPrefab, GameUILayers.NUM, GameUILayerNames);
+
+        director.addPersistRootNode(this.node);
 
         this.preloadBundle(0);
     }
@@ -68,7 +76,25 @@ export class Start extends Component {
                 this.preloadRes(idx);
             }
             else {
-                this.onPreloadingComplete();
+                if (!this.isDone) {
+                    this.isDone = true;
+                    let bundleName = ModuleDef.GAME_BUILD;
+                    if (bundleName) {
+                        let bundle = assetManager.getBundle(bundleName);
+                        if (bundle) {
+                            bundle.loadDir<SpriteAtlas>('res', SpriteAtlas, (err, data) => {
+                                data.forEach(spriteAtlas => {
+                                    Res.spriteAtlas[spriteAtlas.name] = spriteAtlas;
+                                })
+
+                                warn(`Resources All loaded`);
+                                
+                                this.node.getComponent(DataGetter).loadRes();
+                                this.onPreloadingComplete();
+                            })
+                        }
+                    }
+                }
             }
         }
         if (bundle) {
@@ -82,16 +108,14 @@ export class Start extends Component {
         let bundle = assetManager.getBundle(ModuleDef.GAME_BUILD);
         bundle.preloadScene(SceneDef.BUILD_GAME, () => {
             this.onResLoaded();
-            director.loadScene(SceneDef.BUILD_GAME);
+            this.isLoadScene = true;
+            director.loadScene(SceneDef.BUILD_GAME, () => {
+            });
         });
-        // let bundle = assetManager.getBundle(ModuleDef.BASIC);
-        // bundle.preloadScene(SceneDef.MAIN_MENU, () => {
-        //     this.onResLoaded();
-        //     director.loadScene(SceneDef.MAIN_MENU);
-        // });
     }
 
     update(deltaTime: number) {
+        if (this.isLoadScene) return;
         if (this._percent) {
             this.txtLoading.string = 'Loading...' + this._percent;
         }
@@ -102,5 +126,3 @@ export class Start extends Component {
         this.loadingBar.setScale(this._numCurrentLoaded / _totalNum, 1, 1);
     }
 }
-
-

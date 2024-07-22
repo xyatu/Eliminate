@@ -1,4 +1,4 @@
-import { _decorator, Component, Sprite, Event, tween, v3, NodeEventType, EventTouch, log, Vec3, UITransform, warn } from 'cc';
+import { _decorator, Component, Sprite, Event, tween, v3, NodeEventType, EventTouch, log, Vec3, UITransform, warn, Tween } from 'cc';
 const { ccclass, property } = _decorator;
 
 import { TileType, TileEvent } from "../type/Enum";
@@ -16,6 +16,10 @@ export default class Tile extends Component {
     private sprite: Sprite | null = null; // 显示图片的组件
 
     private _type: TileType = null; // 类型
+
+    isFalling: boolean = true;
+
+    tween = null;
 
     /**
      * 获取该方块的类型

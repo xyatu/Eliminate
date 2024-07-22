@@ -1,13 +1,16 @@
-import { _decorator, instantiate, Layout, log, Node, v2, v3, Vec2, Vec3 } from 'cc';
+import { _decorator, instantiate, Layout, log, Node, Sprite, v2, v3, Vec2, Vec3 } from 'cc';
 import { Coord, Coordinate } from '../../../module_eliminate/scripts/game/type/DataStructure';
 import BuildGameConfig from '../data/BuildGameConfig';
 import BuildGameUtil from '../BuildGameUtil';
 import { Layout_MapGrid } from '../../ui/map/Layout_MapGrid';
 import { Layout_BuildFrame } from '../../ui/ui_buildFrame/Layout_BuildFrame';
+import { GameManager } from '../../../start/GameManager';
 
 export default class BuildMapManager {
 
-    public static dataMapDit: { [key: number]: number[][] } = {};
+    public static buildMapDit: { [key: number]: number[][] } = {};
+
+    public static collisionMapDit: { [key: number]: number[][] } = {};
 
     public static nodeMapDit: { [key: number]: Node[][] } = {};
 
@@ -32,8 +35,8 @@ export default class BuildMapManager {
 
     public static getCoord(x: number | Vec2, y?: number): Coordinate {
         let pos: Vec2 = typeof x === 'number' ? v2(x, y) : x;
-        for (let index = 0; index < BuildGameConfig.col; index++) {
-            for (let j = 0; j < BuildGameConfig.row; j++) {
+        for (let index = 0; index < GameManager.inst.playerState.mapCol; index++) {
+            for (let j = 0; j < GameManager.inst.playerState.mapRow; j++) {
                 if (BuildGameUtil.pointIsInsideTargetArea(pos, this._posMap[index][j])) {
                     return Coord(index, j);
                 }
@@ -46,23 +49,28 @@ export default class BuildMapManager {
         return this._posMap;
     }
 
-    public static checkVoid(type: number, x: number, y: number): boolean {
-        return this.dataMapDit[type][y][x] === 0 && this.nodeMapDit[type][y][x] === null;
+    public static checkVoid(type: number, x: number, y: number, building: Node): boolean {
+        return (this.buildMapDit[type][y][x] === 0 && this.nodeMapDit[type][y][x] === null) || this.nodeMapDit[type][y][x] === building;
     }
 
-    public static place(coord: Coordinate, type: number, dataArr: number[][], node: Node) {
+    public static place(coord: Coordinate, type: number, colShape: number[][], buildShape: number[][], node: Node) {
 
         let building = new Building(node, type, node.getPosition());
 
-        for (let c = 0; c < dataArr.length; c++) {
-            for (let r = 0; r < dataArr[c].length; r++) {
-                if (dataArr[c][r] !== 0) {
-                    this.dataMapDit[type][coord.y + c][coord.x + r] = dataArr[c][r];
+        for (let c = 0; c < buildShape.length; c++) {
+            for (let r = 0; r < buildShape[c].length; r++) {
+                if (buildShape[c][r] !== 0) {
+                    this.buildMapDit[type][coord.y + c][coord.x + r] = buildShape[c][r];
                     this.nodeMapDit[type][coord.y + c][coord.x + r] = node;
-                    building.setCoord(Coord(coord.x + r, coord.y + c), dataArr[c][r]);
+                    this.collisionMapDit[type][coord.y + c][coord.x + r] = colShape[c][r];
+                    building.setCoord(Coord(coord.x + r, coord.y + c), buildShape[c][r], colShape[c][r]);
                 }
             }
         }
+
+        // log(this.buildMapDit);
+        // log(this.collisionMapDit);
+        // log(this.nodeMapDit);
 
         this.dataBuilding.push(building);
     }
@@ -74,7 +82,8 @@ export default class BuildMapManager {
             // 更新地图数据
             for (let i = 0; i < mapBuilding.coordArr.length; i++) {
                 let coord = mapBuilding.coordArr[i];
-                this.dataMapDit[mapBuilding.type][coord.y][coord.x] = 0;
+                this.buildMapDit[mapBuilding.type][coord.y][coord.x] = 0;
+                this.collisionMapDit[mapBuilding.type][coord.y][coord.x] = 0;
                 this.nodeMapDit[mapBuilding.type][coord.y][coord.x] = null;
             }
 
@@ -96,7 +105,8 @@ export default class BuildMapManager {
         this.dataBuilding.forEach(data => {
             for (let i = 0; i < data.coordArr.length; i++) {
                 let coord = data.coordArr[i];
-                this.dataMapDit[data.type][coord.y][coord.x] = 0;
+                this.buildMapDit[data.type][coord.y][coord.x] = 0;
+                this.collisionMapDit[data.type][coord.y][coord.x] = 0;
                 this.nodeMapDit[data.type][coord.y][coord.x] = null;
             }
             try {
@@ -125,10 +135,10 @@ export default class BuildMapManager {
     public static SetSelectNode(selectNode: Node) {
         if (selectNode) { this.selectNode = this.dataBuilding.find(databuilding => databuilding.node == selectNode); }
         else this.selectNode = null;
-        Layout_BuildFrame.inst.onSelectBuilding(this.selectNode != null);
         if (selectNode) {
             for (let i = 0; i < this.selectNode.coordArr.length; i++) {
-                this.dataMapDit[this.selectNode.type][this.selectNode.coordArr[i].y][this.selectNode.coordArr[i].x] = this.selectNode.coordDataArr[i];
+                this.buildMapDit[this.selectNode.type][this.selectNode.coordArr[i].y][this.selectNode.coordArr[i].x] = this.selectNode.coordDataArr[i];
+                this.collisionMapDit[this.selectNode.type][this.selectNode.coordArr[i].y][this.selectNode.coordArr[i].x] = this.selectNode.coordColArr[i];
                 this.nodeMapDit[this.selectNode.type][this.selectNode.coordArr[i].y][this.selectNode.coordArr[i].x] = this.selectNode.node;
             }
         }
@@ -137,9 +147,11 @@ export default class BuildMapManager {
     public static hideBuilding(targetNode: Node) {
         this.selectNode = this.dataBuilding.find(databuilding => databuilding.node == targetNode).copy();
         targetNode.getChildByName('Sprite').active = false;
+        targetNode.getComponent(Sprite).enabled = false;
         let mapBuilding = this.dataBuilding.find(databuilding => databuilding.node == targetNode);
         mapBuilding.coordArr.forEach(coord => {
-            this.dataMapDit[mapBuilding.type][coord.y][coord.x] = 0;
+            this.buildMapDit[mapBuilding.type][coord.y][coord.x] = 0;
+            this.collisionMapDit[mapBuilding.type][coord.y][coord.x] = 0;
             this.nodeMapDit[mapBuilding.type][coord.y][coord.x] = null;
         })
         mapBuilding = null;
@@ -157,6 +169,8 @@ export default class BuildMapManager {
         this.generatePosMap();
         this.generateDataMapDit();
         this.generateNodeMapDit();
+        this.generateColMapDit();
+        BuildGameUtil.saveMap();
     }
 
     /**
@@ -165,18 +179,18 @@ export default class BuildMapManager {
     private static generatePosMap() {
         this._posMap = [];
         // 计算宽高
-        this.width = (BuildGameConfig.padding * 2) + (BuildGameConfig.size * BuildGameConfig.col) + (BuildGameConfig.spacing * (BuildGameConfig.col - 1));
-        this.height = (BuildGameConfig.padding * 2) + (BuildGameConfig.size * BuildGameConfig.row) + (BuildGameConfig.spacing * (BuildGameConfig.row - 1));
+        this.width = (BuildGameConfig.padding * 2) + (BuildGameConfig.size * GameManager.inst.playerState.mapCol) + (BuildGameConfig.spacing * (GameManager.inst.playerState.mapCol - 1));
+        this.height = (BuildGameConfig.padding * 2) + (BuildGameConfig.size * GameManager.inst.playerState.mapRow) + (BuildGameConfig.spacing * (GameManager.inst.playerState.mapRow - 1));
         // 以左下角为原点，计算第一个方块的位置
-        this.beginX = -(this.width / 2) + BuildGameConfig.padding + (BuildGameConfig.size / 2);
+        this.beginX = -(this.width / 2) + BuildGameConfig.padding + (BuildGameConfig.size / 2) - BuildGameConfig.size / 2;
         this.beginY = -(this.height / 2) + BuildGameConfig.padding + (BuildGameConfig.size / 2);
         // 计算所有方块的位置
         // 从左到右计算每一列方块的位置
-        for (let c = 0; c < BuildGameConfig.col; c++) {
+        for (let c = 0; c < GameManager.inst.playerState.mapCol; c++) {
             let colSet = [];
             let x = this.beginX + c * (BuildGameConfig.size + BuildGameConfig.spacing);
             // 从下到上计算该列的每一个方块的位置
-            for (let r = 0; r < BuildGameConfig.row; r++) {
+            for (let r = 0; r < GameManager.inst.playerState.mapRow; r++) {
                 let y = this.beginY + r * (BuildGameConfig.size + BuildGameConfig.spacing);
                 colSet.push(v2(x, y));
             }
@@ -187,26 +201,39 @@ export default class BuildMapManager {
     private static generateDataMapDit() {
         for (let layer = 0; layer < BuildGameConfig.layers; layer++) {
             let dataMap: number[][] = [];
-            for (let i = 0; i < BuildGameConfig.row; i++) {
+            for (let i = 0; i < GameManager.inst.playerState.mapRow; i++) {
                 dataMap.push([]);
-                for (let j = 0; j < BuildGameConfig.col; j++) {
+                for (let j = 0; j < GameManager.inst.playerState.mapCol; j++) {
                     dataMap[i].push(0);
                 }
             }
-            this.dataMapDit[layer + 1] = dataMap;
+            this.buildMapDit[layer] = dataMap;
         }
     }
 
     private static generateNodeMapDit() {
         for (let layer = 0; layer < BuildGameConfig.layers; layer++) {
             let dataMap: Node[][] = [];
-            for (let i = 0; i < BuildGameConfig.row; i++) {
+            for (let i = 0; i < GameManager.inst.playerState.mapRow; i++) {
                 dataMap.push([]);
-                for (let j = 0; j < BuildGameConfig.col; j++) {
+                for (let j = 0; j < GameManager.inst.playerState.mapCol; j++) {
                     dataMap[i].push(null);
                 }
             }
-            this.nodeMapDit[layer + 1] = dataMap;
+            this.nodeMapDit[layer] = dataMap;
+        }
+    }
+
+    private static generateColMapDit() {
+        for (let layer = 0; layer < BuildGameConfig.layers; layer++) {
+            let dataMap: number[][] = [];
+            for (let i = 0; i < GameManager.inst.playerState.mapRow; i++) {
+                dataMap.push([]);
+                for (let j = 0; j < GameManager.inst.playerState.mapCol; j++) {
+                    dataMap[i].push(null);
+                }
+            }
+            this.collisionMapDit[layer] = dataMap;
         }
     }
 }
@@ -217,6 +244,7 @@ class Building {
     position: Vec3 = new Vec3();
     coordArr: Coordinate[] = [];
     coordDataArr: number[] = [];
+    coordColArr: number[] = [];
 
     constructor(node: Node, type: number, position: Vec3) {
         this.node = node;
@@ -224,15 +252,17 @@ class Building {
         this.position = position
     }
 
-    setCoord(coord: Coordinate, data: number) {
+    setCoord(coord: Coordinate, data: number, col: number) {
         this.coordArr.push(coord);
         this.coordDataArr.push(data);
+        this.coordColArr.push(col);
     }
 
     copy(): Building {
         let result: Building = new Building(instantiate(this.node), this.type, new Vec3(this.position));
         result.coordArr = [...this.coordArr];
         result.coordDataArr = [...this.coordDataArr];
+        result.coordColArr = [...this.coordColArr];
         return result;
     }
 }
