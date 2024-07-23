@@ -18,7 +18,7 @@ export class EliminateState extends Component {
 
     public cbGameOverEvent: Function[] = [];
 
-    private score: number = 0;
+    public score: number = 0;
 
     protected onLoad(): void {
         EliminateState.inst = this;

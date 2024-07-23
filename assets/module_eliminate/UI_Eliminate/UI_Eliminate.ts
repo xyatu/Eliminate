@@ -7,6 +7,8 @@ import { SceneDef } from '../../scripts/SceneDef';
 import { DataGetter, Sound } from '../../start/DataGetter';
 import { SoundConfig } from '../../start/SoundConfig';
 import { GameManager } from '../../start/GameManager';
+import { UI_OverComp } from '../scripts/game/component/UI_OverComp';
+import { EliminateState } from '../scripts/game/manager/EliminateState';
 const { ccclass, property } = _decorator;
 
 const BundleName = ModuleDef.GAME_ELIMINATE;
@@ -48,13 +50,7 @@ export class UI_Eliminate extends tgxUIController {
             GameManager.inst.playClick();
             tgxUIAlert.show('要返回主界面吗', true).onClick(isOK => {
                 if (isOK) {
-                    assetManager.loadBundle(ModuleDef.GAME_BUILD, (err, bundle: AssetManager.Bundle) => {
-                        if (bundle) {
-                            director.loadScene(SceneDef.BUILD_GAME, () => {
-                                tgxUIMgr.inst.hideAll();
-                            });
-                        }
-                    });
+                    EliminateState.onGameOverEvent();
                 }
             })
         })

@@ -1,4 +1,4 @@
-import { _decorator, Component, instantiate, log, Node, Sprite, UITransform, Vec3, view } from "cc";
+import { _decorator, Component, find, instantiate, log, Node, Sprite, UITransform, Vec3, view } from "cc";
 
 import { Coord, Coordinate } from "../../../module_eliminate/scripts/game/type/DataStructure";
 import BuildMapManager from "../../script/manager/BuildMapManager";
@@ -163,7 +163,8 @@ export class Builder extends Component {
 
         let pos = building.position;
         let size = building.getComponent(UITransform).contentSize;
-        building.setPosition(pos.x - size.width / 4, pos.y, pos.z);
+        let canvas = find('Canvas');
+        building.setWorldPosition(canvas.getComponent(UITransform).contentSize.width / 2 - size.width / 2, canvas.getComponent(UITransform).contentSize.height / 2, pos.z);
 
         BuilderComp.inst.setSelect(building);
 
