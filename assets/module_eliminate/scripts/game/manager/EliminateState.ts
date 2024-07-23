@@ -38,7 +38,7 @@ export class EliminateState extends Component {
 
     private gameOver() {
         EliminateState.inst.isGameOver = true;
-        let gold = Math.ceil(EliminateState.inst.score / 10000);
+        let gold = Math.floor(EliminateState.inst.score / 100);
 
         GameManager.inst.onGoldChange(gold);
         EliminateState.inst.saveGold();

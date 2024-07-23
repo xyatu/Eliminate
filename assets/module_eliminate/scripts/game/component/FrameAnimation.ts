@@ -1,4 +1,4 @@
-import { Component, error, EventHandler, Sprite, SpriteAtlas, _decorator, SpriteFrame, log } from "cc";
+import { Component, error, EventHandler, Sprite, SpriteAtlas, _decorator, SpriteFrame, log, Vec3 } from "cc";
 
 
 const { ccclass, property } = _decorator;
@@ -9,7 +9,7 @@ export class FrameAnimation extends Component {
     @property(SpriteFrame)
     protected spriteFrame: SpriteFrame[] = [];
 
-    protected rate: number = 0.05;
+    protected rate: number = 20;
 
     protected loop: boolean = false;
 
@@ -49,6 +49,16 @@ export class FrameAnimation extends Component {
     }
 
     protected update(dt: number): void {
+        let scale: Vec3 = this.node.scale.clone();
+        if (this.currentIndex <= 5) {
+            this.node.setScale(scale.x + 15 * dt, scale.y + 15 * dt, scale.z);
+        }
+        else {
+            if (this.node.scale.x > 1 || this.node.scale.y > 1) {
+                this.node.setScale(scale.x - 50 * dt, scale.y - 50 * dt, scale.z);
+            }
+
+        }
         if (!this.running) {
             return;
         }
@@ -75,6 +85,7 @@ export class FrameAnimation extends Component {
         if (isIndexEnd) {
             this.completeCallback.forEach(callback => { callback.emit([]); });
             this.currentIndex = 0;
+            this.node.setScale(1, 1, 1);
         }
         if (!this.spriteFrame) {
             error("atlas not exist!")

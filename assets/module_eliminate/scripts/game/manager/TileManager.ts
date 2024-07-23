@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Vec2, v3, tween, v2, log, warn, error, random, math } from 'cc';
+import { _decorator, Component, Node, Vec2, v3, tween, v2, log, warn, error, random, math, instantiate, Prefab } from 'cc';
 const { ccclass, property } = _decorator;
 
 import Tile from "../component/Tile";
@@ -27,6 +27,16 @@ export default class TileManager extends Component {
 
     @property(Node)
     private mapContainer: Node | null = null; //所有底格的容器
+
+
+    @property(Node)
+    effBox: Node = null;
+    @property(Prefab)
+    matrixEff: Prefab = null;
+    @property(Prefab)
+    horiEff: Prefab = null;
+    @property(Prefab)
+    verEff: Prefab = null;
 
     private typeMap: TileType[][] = null; // 类型表：二维数组，保存所有方块的类型，方便计算
 
@@ -114,12 +124,12 @@ export default class TileManager extends Component {
     }
 
     changeFallInterval(dt) {
-        if (this.autoFallInterval > 0.5) {
+        if (this.autoFallInterval > 0.1) {
             this.timeTick += dt;
             if (this.timeTick >= GameConfig.changeFallIntervalval) {
                 this.timeTick -= GameConfig.changeFallIntervalval;
-                this.autoFallInterval -= 0.2;
-                if (this.autoFallInterval < 0.5) this.autoFallInterval = 0.5;
+                this.autoFallInterval -= 0.02;
+                if (this.autoFallInterval < 0.1) this.autoFallInterval = 0.1;
             }
         }
     }
@@ -389,6 +399,10 @@ export default class TileManager extends Component {
         switch (this.getType(coord)) {
             case TileType.Ver:
                 {
+                    let eff: Node = instantiate(this.verEff);
+                    eff.parent = this.effBox;
+                    eff.setPosition(MapManager.getPos(coord).x, MapManager.getPos(coord).y, 0)
+
                     let sound: Sound = DataGetter.inst.sound.get(SoundConfig.eliminate_Ver);
                     tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
 
@@ -404,6 +418,10 @@ export default class TileManager extends Component {
                 }
             case TileType.Hori:
                 {
+                    let eff: Node = instantiate(this.horiEff);
+                    eff.parent = this.effBox;
+                    eff.setPosition(MapManager.getPos(coord).x, MapManager.getPos(coord).y, 0)
+
                     let sound: Sound = DataGetter.inst.sound.get(SoundConfig.eliminate_Hori);
                     tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
 
@@ -419,6 +437,10 @@ export default class TileManager extends Component {
                 }
             case TileType.Matrix:
                 {
+                    let eff: Node = instantiate(this.matrixEff);
+                    eff.parent = this.effBox;
+                    eff.setPosition(MapManager.getPos(coord).x, MapManager.getPos(coord).y, 0)
+
                     let sound: Sound = DataGetter.inst.sound.get(SoundConfig.eliminate_Matrix);
                     tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
                     this.eliminateTile(Coord(coord.x, coord.y));
@@ -600,7 +622,11 @@ export default class TileManager extends Component {
      * @param y 纵坐标
      */
     private getType(x: number | Coordinate, y?: number): TileType {
-        return typeof x === 'number' ? this.typeMap[x][y] : this.typeMap[x.x][x.y];
+        try {
+            return (typeof x === 'number') ? this.typeMap[x][y] : this.typeMap[x.x][x.y];
+        } catch (error) {
+
+        }
     }
 
     /**

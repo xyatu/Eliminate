@@ -19,16 +19,16 @@ export default class GameConfig {
         [TileType.H]: 30,
         [TileType.I]: 30,
         [TileType.J]: 30,
-        [TileType.Ver]: 100,
-        [TileType.Hori]: 100,
-        [TileType.Matrix]: 100,
+        [TileType.Ver]: 1,
+        [TileType.Hori]: 1,
+        [TileType.Matrix]: 1,
         [TileType.Z]: 0
     };
     public static eliminateScore: number = 10;
 
-    public static autoFallInterval: number = 2;
+    public static autoFallInterval: number = 1;
 
-    public static changeFallIntervalval: number = 60;
+    public static changeFallIntervalval: number = 10;
 
     public static initialRow: number = 0;
 }

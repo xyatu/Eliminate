@@ -10,7 +10,6 @@ import { Building, DataGetter } from "../../../start/DataGetter";
 import { Layout_MapGrid } from "../../ui/map/Layout_MapGrid";
 import { GameManager } from "../../../start/GameManager";
 import { BuilderComp } from "./BuilderComp";
-import { building_data } from "../../../start/data/building_data";
 const { ccclass, property } = _decorator;
 
 const directions = [
