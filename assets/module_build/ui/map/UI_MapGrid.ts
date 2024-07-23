@@ -42,7 +42,7 @@ export class UI_MapGrid extends tgxUIController {
         for (let index = BuildGameConfig.buttomLayer; index < BuildGameConfig.buttomLayer + BuildGameConfig.layers; index++) {
             let layer: Node = instantiate(layout.layer);
             this.node.addChild(layer);
-            layer.setPosition(0, 0, index * 100);
+            layer.setPosition(0, 0, index * 100 - 2000);
             layer.name = index.toString();
         }
 

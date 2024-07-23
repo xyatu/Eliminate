@@ -36,7 +36,10 @@ export class BuildingState extends Component {
 
     coord: Coordinate = null;
 
+    origin: Vec2 = new Vec2();
+
     protected start(): void {
+        this.node.on(NodeEventType.TOUCH_START, this.touchStart, this, true);
         this.node.on(NodeEventType.TOUCH_END, this.touchEnd, this, true);
     }
 
@@ -46,7 +49,7 @@ export class BuildingState extends Component {
         this.move.node.active = true;
         this.putDown.node.active = true;
         this.Del.node.active = true;
-        this.node.setSiblingIndex(this.node.parent.children.length - 1)
+        this.node.parent = this.node.parent.parent.children[this.node.parent.parent.children.length - 5];
     }
 
     unSelect() {
@@ -59,6 +62,7 @@ export class BuildingState extends Component {
         if (this.coord) {
             let loc: Vec2 = BuildMapManager.getPos(this.coord);
             this.node.setPosition(loc.x, loc.y - BuildGameConfig.size / 2, this.node.position.z);
+            this.node.parent = this.node.parent.parent.getChildByName(this.data.layer.toString());
         }
     }
 
@@ -84,7 +88,12 @@ export class BuildingState extends Component {
         }
     }
 
+    touchStart(event: EventTouch) {
+        this.origin = event.getLocation();
+    }
+
     touchEnd(event: EventTouch) {
+        if (this.origin.subtract(event.getLocation()).length() > 50) return
         if (!this.isSelect) {
             let sound: Sound = DataGetter.inst.sound.get(SoundConfig.build_select);
             tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
