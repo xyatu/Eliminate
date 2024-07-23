@@ -68,9 +68,12 @@ export class CharacterMovement2D extends Component {
             this.node.getComponent(CharacterFSM).playAnimationForDirection(direction);
             // this.node.setPosition(pos.x + tempV2.x, pos.y + tempV2.y, pos.z);
             this.node.getComponent(GridMovement).CharacterMove(direction);
+            log(111)
         }
-        if (!this.node.getComponent(CharacterState).isMoving) {
-            this.node.getComponent(CharacterFSM).playAnimationForDirection(Direction.None)
+        else {
+            if (!this.node.getComponent(CharacterState).isMoving) {
+                this.node.getComponent(CharacterFSM).playAnimationForDirection(Direction.None)
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 import { _decorator, Component, Animation, sp, Sprite, animation, log } from 'cc';
 import { CharacterState } from './CharacterState';
 import { RoleAnim } from './RoleAnim';
+import { GridMovement } from './GridMovement';
 const { ccclass, property } = _decorator;
 
 export enum Direction {
