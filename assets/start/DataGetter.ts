@@ -1,8 +1,9 @@
-import { _decorator, Asset, assetManager, Component, log, Node, rect, Rect, sp, SpriteAtlas, SpriteFrame, v2 } from 'cc';
+import { _decorator, Asset, assetManager, AudioClip, Component, log, Node, rect, Rect, sp, SpriteAtlas, SpriteFrame, v2 } from 'cc';
 import { building_data, getbuilding_dataById } from './data/building_data';
 import { Res } from './Res';
 import BuildGameConfig from '../module_build/script/data/BuildGameConfig';
 import { role_data } from './data/role_data';
+import { sound_data } from './data/sound_data';
 const { ccclass, property } = _decorator;
 
 const direction = ['u', 'd', 'l', 'r'];
@@ -67,6 +68,16 @@ export class Role {
     }
 }
 
+export class Sound {
+    audio: AudioClip;
+    volumn: number;
+
+    constructor(audio: AudioClip, volum: number) {
+        this.audio = audio;
+        this.volumn = volum;
+    }
+}
+
 export class SceneAnim {
     id: number;
     anim: Anim;
@@ -116,6 +127,7 @@ export class DataGetter extends Component {
     buildingdata: Building[] = [];
     roledata: Role[] = [];
     animdata: SceneAnim[] = [];
+    sound: Map<number, Sound> = new Map();
 
     numSprite: NumSprite = new NumSprite();
 
@@ -125,9 +137,9 @@ export class DataGetter extends Component {
     }
 
     async loadRes() {
-        this.loadBuilding();
         this.loadRole();
         this.loadSundries();
+        this.loadBuilding();
     }
 
     loadBuilding() {
@@ -136,9 +148,12 @@ export class DataGetter extends Component {
             let spriteFrames: SpriteFrame[] = [];
 
             if (data["automatic"] === 1) {
+                log(data["anim"])
+                let spriteFrame: SpriteFrame = Res.spriteFrame[data["anim"]];
                 for (let i = 0; i < BuildGameConfig.autoTileHeight / BuildGameConfig.autoTileSize; i++) {
                     for (let j = 0; j < BuildGameConfig.autoTileWidth / BuildGameConfig.autoTileSize; j++) {
-                        spriteFrames.push(this.cropSpriteFrame(Res.spriteAtlas[data["plist"]].getSpriteFrame(data["anim"]), rect(BuildGameConfig.autoTileSize * j, BuildGameConfig.autoTileSize * i, BuildGameConfig.autoTileSize, BuildGameConfig.autoTileSize)))
+                        let autoTile: SpriteFrame = this.cropSpriteFrame(spriteFrame, rect(BuildGameConfig.autoTileSize * j, BuildGameConfig.autoTileSize * i, BuildGameConfig.autoTileSize, BuildGameConfig.autoTileSize));
+                        spriteFrames.push(autoTile);
                     }
                 }
             }
@@ -165,6 +180,7 @@ export class DataGetter extends Component {
         }
     }
 
+
     setShape(shape: string): number[][] {
         let shapeArr: number[][] = [];
         shape.toString().split(';').reverse().forEach(row => {
@@ -183,6 +199,7 @@ export class DataGetter extends Component {
     }
 
     cropSpriteFrame(sourceSpriteFrame: SpriteFrame, cropRect: Rect): SpriteFrame {
+
         // 创建一个新的 SpriteFrame
         const croppedSpriteFrame = new SpriteFrame();
 
@@ -250,6 +267,18 @@ export class DataGetter extends Component {
 
         for (let index = 0 + 10 + 10 + 1 + 10; index < 0 + 10 + 10 + 1 + 10 + 7; index++) {
             this.numSprite.week.push(atlas.getSpriteFrames()[index]);
+        }
+    }
+
+    loadSound() {
+        for (const key in sound_data) {
+            if (Object.prototype.hasOwnProperty.call(sound_data, key)) {
+                let data = sound_data[key];
+                this.sound.set(parseInt(data['ID']), new Sound(
+                    Res.audio[data['path']],
+                    parseInt(data['volumn'])
+                ))
+            }
         }
     }
 

@@ -1,4 +1,4 @@
-import { _decorator, Component, EventMouse, EventTouch, instantiate, log, math, Node, NodeEventType, Sprite, v3 } from 'cc';
+import { _decorator, Component, EventMouse, EventTouch, instantiate, log, math, Node, NodeEventType, Rect, Sprite, SpriteFrame, v3 } from 'cc';
 import { UILayers } from '../../../core_tgx/easy_ui_framework/UILayers';
 import { Layout_BuildFrame } from './Layout_BuildFrame';
 import { tgxEasyController, tgxUIAlert, tgxUIController, tgxUIMgr } from '../../../core_tgx/tgx';
@@ -13,6 +13,8 @@ import { DataGetter } from '../../../start/DataGetter';
 import { Builder } from '../../script/manager/Builder';
 import { BuildGame } from '../../script/BuildGame';
 import { GameManager } from '../../../start/GameManager';
+import { BuilderComp } from '../../script/manager/BuilderComp';
+import { BuildingState } from '../../script/building/BuildingState';
 const { ccclass, property } = _decorator;
 
 @ccclass('UI_Build')
@@ -30,7 +32,15 @@ export class UI_BuildFrame extends tgxUIController {
         DataGetter.inst.buildingdata.forEach(data => {
             let ui: Node = instantiate(layout.building_ui);
             ui.getComponent(UI_Building).building_data = data;
-            ui.getChildByName('Sprite').getComponent(Sprite).spriteFrame = data.anim.anim[0];
+            if (data.autoTile === 1) {
+                ui.getChildByName('tile').children[0].getComponent(Sprite).spriteFrame = data.anim.anim[0];
+                ui.getChildByName('tile').children[1].getComponent(Sprite).spriteFrame = data.anim.anim[1];
+                ui.getChildByName('tile').children[2].getComponent(Sprite).spriteFrame = data.anim.anim[6];
+                ui.getChildByName('tile').children[3].getComponent(Sprite).spriteFrame = data.anim.anim[7];
+            }
+            else {
+                ui.getChildByName('Sprite').getComponent(Sprite).spriteFrame = data.anim.anim[0];
+            }
             layout.buildingBox.getChildByName(data.type.toString()).children[1].children[0].addChild(ui);
             ui.setPosition(v3(0, 0, 0))
             ui.getComponent(UI_Building).setLock((data.price > 0 && GameManager.inst.playerState.hasBuilding.findIndex(has => has === data.id) === -1));
@@ -63,6 +73,7 @@ export class UI_BuildFrame extends tgxUIController {
         }, this)
 
         this.onButtonEvent(layout.back, () => {
+            if (BuilderComp.inst.selectedBuilding) BuilderComp.inst.selectedBuilding.getComponent(BuildingState).unSelect();
             if (Layout_Normal.inst) {
                 Layout_Normal.inst.node.active = true;
             }

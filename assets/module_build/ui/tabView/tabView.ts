@@ -1,4 +1,5 @@
 import { _decorator, Button, Canvas, Component, EventHandler, Layout, log, Node, ScrollView, size, Size, Sprite, SpriteFrame, UITransform, Vec2, Vec3 } from 'cc';
+import { GameManager } from '../../../start/GameManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('tabView')
@@ -40,6 +41,7 @@ export class tabView extends Component {
     }
 
     switchTab(e: any) {
+        GameManager.inst.playClick();
         this.setTab(e.currentTarget)
     }
 

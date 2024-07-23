@@ -1,10 +1,12 @@
 import { _decorator, AssetManager, assetManager, Component, director, game, Game, instantiate, Layout, log, Node, Sprite } from 'cc';
-import { tgxUIController, tgxUIMgr } from '../../core_tgx/tgx';
+import { tgxAudioMgr, tgxUIAlert, tgxUIController, tgxUIMgr } from '../../core_tgx/tgx';
 import { GameUILayers } from '../../scripts/GameUILayers';
 import { Layout_Eliminate } from './Layout_Eliminate';
 import { ModuleDef } from '../../scripts/ModuleDef';
 import { SceneDef } from '../../scripts/SceneDef';
-import { DataGetter } from '../../start/DataGetter';
+import { DataGetter, Sound } from '../../start/DataGetter';
+import { SoundConfig } from '../../start/SoundConfig';
+import { GameManager } from '../../start/GameManager';
 const { ccclass, property } = _decorator;
 
 const BundleName = ModuleDef.GAME_ELIMINATE;
@@ -43,13 +45,18 @@ export class UI_Eliminate extends tgxUIController {
         }
 
         this.onButtonEvent('Back', () => {
-            assetManager.loadBundle(ModuleDef.GAME_BUILD, (err, bundle: AssetManager.Bundle) => {
-                if (bundle) {
-                    director.loadScene(SceneDef.BUILD_GAME, () => {
-                        tgxUIMgr.inst.hideAll();
+            GameManager.inst.playClick();
+            tgxUIAlert.show('要返回主界面吗', true).onClick(isOK => {
+                if (isOK) {
+                    assetManager.loadBundle(ModuleDef.GAME_BUILD, (err, bundle: AssetManager.Bundle) => {
+                        if (bundle) {
+                            director.loadScene(SceneDef.BUILD_GAME, () => {
+                                tgxUIMgr.inst.hideAll();
+                            });
+                        }
                     });
                 }
-            });
+            })
         })
 
         layout.onChangeScoreEvent(0);

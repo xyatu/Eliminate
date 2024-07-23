@@ -1,10 +1,12 @@
 import { _decorator, Component, director, instantiate, log, Node, Prefab, view } from 'cc';
 import GameUtil from '../util/GameUtil';
-import { tgxUIAlert, tgxUIController, tgxUIMgr, tgxUIWaiting } from '../../../../core_tgx/tgx';
+import { tgxAudioMgr, tgxUIAlert, tgxUIController, tgxUIMgr, tgxUIWaiting } from '../../../../core_tgx/tgx';
 import { SceneDef } from '../../../../scripts/SceneDef';
 import { GameManager } from '../../../../start/GameManager';
 import { UI_OverComp as UI_OverComp } from '../component/UI_OverComp';
 import { SlotConfig } from '../../../../start/SlotConfig';
+import { DataGetter, Sound } from '../../../../start/DataGetter';
+import { SoundConfig } from '../../../../start/SoundConfig';
 const { ccclass, property } = _decorator;
 
 @ccclass('EliminateState')
@@ -36,17 +38,21 @@ export class EliminateState extends Component {
 
     private gameOver() {
         EliminateState.inst.isGameOver = true;
-        let gold = EliminateState.inst.score;
+        let gold = Math.ceil(EliminateState.inst.score / 10000);
 
         GameManager.inst.onGoldChange(gold);
         EliminateState.inst.saveGold();
 
         let over: UI_OverComp = tgxUIMgr.inst.showUI(UI_OverComp, () => {
-            over.initUI(EliminateState.inst.score);
+            over.initUI(gold);
         });
     }
 
     public static onGameOverEvent(event?: any) {
+
+        let sound: Sound = DataGetter.inst.sound.get(SoundConfig.eliminate_over);
+        tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
+
         if (EliminateState.inst.cbGameOverEvent.length > 0) {
             EliminateState.inst.cbGameOverEvent.forEach(cbGameOverEvent => cbGameOverEvent(event));
         }

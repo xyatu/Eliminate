@@ -20,7 +20,7 @@ export class BuilderComp extends Component {
     setSelect(building: Node) {
         if (building) {
             if (this.selectedBuilding) {
-                if (building.getComponent(BuildingState).coord) {
+                if (this.selectedBuilding.getComponent(BuildingState).coord) {
                     this.selectedBuilding.getComponent(BuildingState).unSelect();
                 }
                 else {

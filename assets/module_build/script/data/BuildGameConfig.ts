@@ -7,7 +7,7 @@ export default class BuildGameConfig {
     public static spacing: number = 0; // 间隔
     public static padding: number = 0; // 边距
     public static buttomLayer: number = 1; // 最底层
-    public static layers: number = 6 + 2; //层数
+    public static layers: number = 10 + 2; //层数
     public static characterType: number = 7; // 玩家层
 
     public static playerNum: number = 2;
@@ -41,4 +41,6 @@ export default class BuildGameConfig {
     public static NPCSpawnInterval: number = 5;
 
     public static SaveGameInterval: number = 1;
+
+    public static buttomRole: number = 4;
 }

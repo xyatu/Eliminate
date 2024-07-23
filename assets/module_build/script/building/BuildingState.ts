@@ -2,12 +2,14 @@ import { _decorator, Button, Component, EventTouch, log, Node, NodeEventType, Sp
 import { Layout_MapGrid } from '../../ui/map/Layout_MapGrid';
 import BuildMapManager from '../manager/BuildMapManager';
 import BuildGameUtil from '../BuildGameUtil';
-import { Building } from '../../../start/DataGetter';
+import { Building, DataGetter, Sound } from '../../../start/DataGetter';
 import { Builder } from '../manager/Builder';
 import { BuilderComp } from '../manager/BuilderComp';
 import { Coordinate } from '../../../module_eliminate/scripts/game/type/DataStructure';
 import BuildGameConfig from '../data/BuildGameConfig';
 import { GPDrag } from '../drag/GPDrag';
+import { SoundConfig } from '../../../start/SoundConfig';
+import { tgxAudioMgr } from '../../../core_tgx/tgx';
 const { ccclass, property } = _decorator;
 
 @ccclass('buildingState')
@@ -35,7 +37,7 @@ export class BuildingState extends Component {
     coord: Coordinate = null;
 
     protected start(): void {
-        this.node.on(NodeEventType.TOUCH_END, this.touchEnd, this, false);
+        this.node.on(NodeEventType.TOUCH_END, this.touchEnd, this, true);
     }
 
     select() {
@@ -61,6 +63,8 @@ export class BuildingState extends Component {
     }
 
     doPutDown() {
+        let sound: Sound = DataGetter.inst.sound.get(SoundConfig.build_determine);
+        tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
         if (BuildGameUtil.nodeIsInsideTargetArea(this.node, Layout_MapGrid.inst.node)) {
             if (Builder.inst.tryBuild(this.node, this.data, false)) {
                 this.unSelect();
@@ -69,6 +73,8 @@ export class BuildingState extends Component {
     }
 
     remove() {
+        let sound: Sound = DataGetter.inst.sound.get(SoundConfig.build_delete);
+        tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
         this.unSelect();
         if (this.coord) {
             Builder.inst.remove(this.node, this.data, this.coord);
@@ -80,6 +86,8 @@ export class BuildingState extends Component {
 
     touchEnd(event: EventTouch) {
         if (!this.isSelect) {
+            let sound: Sound = DataGetter.inst.sound.get(SoundConfig.build_select);
+            tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
             this.select();
             BuilderComp.inst.setSelect(this.node);
         }
@@ -88,6 +96,8 @@ export class BuildingState extends Component {
     moveEnd(e: EventTouch): EventTouch {
         let btnComp: GPDrag = e.target.getComponent(GPDrag);
         Builder.inst.adsorption(btnComp.moveNode);
+        let sound: Sound = DataGetter.inst.sound.get(SoundConfig.build_select);
+        tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
         return e;
     }
 

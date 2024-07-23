@@ -2,6 +2,7 @@ import { _decorator, CCBoolean, TweenEasing, CCFloat, CCString, Component, easin
 import { GPWorkFlow, GPWorkFlowNode } from './GPWorkFlow';
 import { Layout_MapGrid } from '../../ui/map/Layout_MapGrid';
 import { BuildingState } from '../building/BuildingState';
+import { GameManager } from '../../../start/GameManager';
 const { ccclass, property } = _decorator;
 export enum FloatType {
     None,
@@ -83,6 +84,7 @@ export class GPDrag extends Component {
     private dragOffset: Vec2 = new Vec2(0, 0)
     public succeedCheck: Function;
     public succeedCallback: Function;
+    public endCallback: Function;
     private backTween: Tween<Node>
 
     public backHomeWorkFlow = new GPWorkFlow();
@@ -120,11 +122,12 @@ export class GPDrag extends Component {
             wfNode.done();
         }
 
-        this.succeedCheck = this.moveNode.getComponent(BuildingState).check;
-        this.succeedCallback = this.moveNode.getComponent(BuildingState).moveEnd;
+        // this.succeedCheck = this.moveNode.getComponent(BuildingState).check;
+        this.endCallback = this.moveNode.getComponent(BuildingState).moveEnd;
     }
 
     private OnDragStart(e: EventTouch) {
+        GameManager.inst.playClick();
         this.dragStartPos.set(this.moveNode.position.x, this.moveNode.position.y);
         let touchPoint = e.getUILocation();
         Vec2.subtract(this.dragOffset, this.dragStartPos, touchPoint)
@@ -155,6 +158,7 @@ export class GPDrag extends Component {
     }
 
     private OnDragEnd(e: EventTouch) {
+        this.endCallback && this.endCallback(e)
         if (this.succeedCheck && this.succeedCheck(e)) {
             this.succeedCallback && this.succeedCallback(e)
         } else if (this.backHomeWhenFailed) {

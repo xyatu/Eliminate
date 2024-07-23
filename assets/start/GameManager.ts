@@ -1,9 +1,11 @@
 // 例如在一个GameManager脚本中处理TouchEnd事件
 import { _decorator, Component, Label, log, Node } from 'cc';
 import { Coord, Coordinate } from '../module_eliminate/scripts/game/type/DataStructure';
-import { Building } from './DataGetter';
+import { Building, DataGetter, Sound } from './DataGetter';
 import { SlotConfig } from './SlotConfig';
 import { BuildGame } from '../module_build/script/BuildGame';
+import { SoundConfig } from './SoundConfig';
+import { tgxAudioMgr } from '../core_tgx/tgx';
 const { ccclass, property } = _decorator;
 
 export class PlayerState {
@@ -45,11 +47,50 @@ export class GameManager extends Component {
     }
 
     loadGame() {
+        this.initMap();
         this.loadMap();
         this.loadBuildSlot();
         this.loadPSCoordSlot();
         this.loadHasBuilding();
         this.loadGold();
+    }
+
+    initMap() {
+        if (localStorage.getItem(SlotConfig.slot_haveSlot) === SlotConfig.slot_hasSlot) return;
+
+        for (let i = 0; i < this.playerState.mapRow; i++) {
+            for (let j = 0; j < this.playerState.mapCol; j++) {
+                this.saveBuilding(10002, Coord(i, j));
+                if (!((i >= 10 && i <= 14 && j >= 6 && j <= 12) ||
+                    (i >= 15 && i <= 18 && j >= 6 && j <= 8) ||
+                    (i >= 12 && i <= 14 && j >= 13 && j <= 15) ||
+                    (i >= 8 && i <= 9 && j >= 7 && j <= 10) ||
+                    (i >= 5 && i <= 7 && j >= 7 && j <= 11))) {
+                    this.saveBuilding(20001, Coord(i, j));
+                }
+
+                if ((i >= 5 && i <= 5 && j >= 14 && j <= 17) ||
+                    (i >= 5 && i <= 9 && j >= 18 && j <= 18) ||
+                    (i >= 9 && i <= 9 && j >= 14 && j <= 17) ||
+                    (i >= 5 && i <= 9 && j >= 14 && j <= 14)) {
+                    this.saveBuilding(40101, Coord(i, j));
+                }
+            }
+        }
+
+        this.saveBuilding(40201, Coord(4, 12));
+        this.saveBuilding(40201, Coord(11, 16));
+
+        this.saveBuilding(62301, Coord(4, 19));
+        this.saveBuilding(62301, Coord(7, 19));
+        this.saveBuilding(62301, Coord(10, 18));
+        this.saveBuilding(62301, Coord(14, 18));
+        this.saveBuilding(62301, Coord(15, 11));
+        this.saveBuilding(62301, Coord(6, 3));
+        this.saveBuilding(62301, Coord(7, 1));
+        this.saveBuilding(62301, Coord(10, 3));
+        this.saveBuilding(62301, Coord(11, 1));
+        this.saveBuilding(62301, Coord(13, 3));
     }
 
     loadMap() {
@@ -115,6 +156,7 @@ export class GameManager extends Component {
 
     onGoldChange(changeval: number) {
         this.playerState.gold += changeval;
+        Math.ceil(this.playerState.gold)
     }
 
     changeMap(data: Building, coord: Coordinate, isBuild: boolean) {
@@ -159,5 +201,10 @@ export class GameManager extends Component {
 
     onColChange(changval: number) {
         this.ps.mapCol += changval;
+    }
+
+    playClick() {
+        let sound: Sound = DataGetter.inst.sound.get(SoundConfig.click);
+        tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
     }
 }

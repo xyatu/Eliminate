@@ -52,19 +52,19 @@ export class GridMovement extends Component {
 
             if (direction !== Direction.None) {
                 BuildGameUtil.saveplayerCoord(target);
-                log('movement'+target.toString());
+                log('movement' + target.toString());
             }
 
             this.resetLayer();
             tween(this.node)
-                .to(this.node.getComponent(CharacterState).moveTime, { position: v3(BuildMapManager.getPos(target).x + BuildGameConfig.size / 2, BuildMapManager.getPos(target).y, 0) })
+                .to(this.node.getComponent(CharacterState).moveTime, { position: v3(BuildMapManager.getPos(target).x, BuildMapManager.getPos(target).y - BuildGameConfig.size / 2, 0) })
                 .then(tween().call(() => {
                     this.node.getComponent(CharacterState).isMoving = false;
                     if (this.willStop) this.node.getComponent(CharacterFSM).playAnimationForDirection(Direction.None);
                 }))
                 .start();
 
-            Layout_MapGrid.inst.onFollow(this.node.getComponent(CharacterState).moveTime, v2(-BuildMapManager.getPos(target).x + BuildGameConfig.size / 2, -BuildMapManager.getPos(target).y));
+            Layout_MapGrid.inst.onFollow(this.node.getComponent(CharacterState).moveTime, v2(-BuildMapManager.getPos(target).x, -BuildMapManager.getPos(target).y - BuildGameConfig.size / 2));
         }
         else if (direction === Direction.None) {
             this.willStop = true;
@@ -80,7 +80,7 @@ export class GridMovement extends Component {
             this.node.getComponent(CharacterState).characterCoord = target.copy();
             this.resetLayer();
             tween(this.node)
-                .to(this.node.getComponent(CharacterState).moveTime, { position: v3(BuildMapManager.getPos(target).x + BuildGameConfig.size / 2, BuildMapManager.getPos(target).y, 0) })
+                .to(this.node.getComponent(CharacterState).moveTime, { position: v3(BuildMapManager.getPos(target).x, BuildMapManager.getPos(target).y - BuildGameConfig.size / 2, 0) })
                 .then(tween().call(() => {
                     this.node.getComponent(CharacterState).isMoving = false;
                     this.node.getComponent(AIController).resetMoveTarget();
@@ -104,7 +104,7 @@ export class GridMovement extends Component {
     resetLayer() {
         for (let index = 0; index < BuildGameConfig.layers; index++) {
             if (BuildMapManager.buildMapDit[index][this.node.getComponent(CharacterState).characterCoord.y][this.node.getComponent(CharacterState).characterCoord.x] !== 0) {
-                Layout_MapGrid.inst.node.getChildByName(index < 3 ? '3' : index.toString()).addChild(this.node);
+                Layout_MapGrid.inst.node.getChildByName(index < BuildGameConfig.buttomRole ? BuildGameConfig.buttomRole.toString() : index.toString()).addChild(this.node);
                 break;
             }
         }

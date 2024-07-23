@@ -46,6 +46,8 @@ export class UI_MapGrid extends tgxUIController {
             layer.name = index.toString();
         }
 
+        this.node.getChildByName('grid').setSiblingIndex(this.node.children.length - 1)
+
         layout.initFinish = true;
 
         layout.cbOnChangeScale = this.onChangeScale;
@@ -54,9 +56,8 @@ export class UI_MapGrid extends tgxUIController {
 
         layout.cbOnBuild = this.onBuild;
 
-        this.node.on(NodeEventType.TOUCH_MOVE, this.touchMove, this, true);
-        this.node.on(NodeEventType.TOUCH_END, this.touchEnd, this, true);
-        this.node.on(NodeEventType.MOUSE_WHEEL, this.mouseWheel, this, true);
+        this.node.on(NodeEventType.TOUCH_MOVE, this.touchMove, this, false);
+        this.node.on(NodeEventType.MOUSE_WHEEL, this.mouseWheel, this, false);
 
         let coord: Coordinate = GameManager.inst.playerState.playerCoord;
         if (!coord) coord = Coord(Math.floor(GameManager.inst.playerState.mapCol / 2), Math.floor(GameManager.inst.playerState.mapRow / 2));
@@ -93,14 +94,6 @@ export class UI_MapGrid extends tgxUIController {
         } else if (event.getTouches().length === 1) {
             BuildGameUtil.dragShow(event);
         }
-    }
-
-    touchEnd() {
-        let layout = this.layout as Layout_MapGrid;
-
-        layout.isTouch = false;
-        layout.touchTime = 0;
-        // layout.isSelect = false;
     }
 
     mouseWheel(event: EventMouse) {

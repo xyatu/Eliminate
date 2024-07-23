@@ -10,6 +10,7 @@ import { DataGetter } from '../../../start/DataGetter';
 import { GameManager } from '../../../start/GameManager';
 import { BuildGame } from '../BuildGame';
 import BuildGameUtil from '../BuildGameUtil';
+import { GridMovement } from '../character/GridMovement';
 const { ccclass, property } = _decorator;
 
 @ccclass('CharacterManager')
@@ -105,7 +106,7 @@ export class CharacterManager extends Component {
         const character = instantiate(this.characterPrefab);
         let position = BuildMapManager.getPos(coord);
         // character.setPosition(character.position.x + BuildGameConfig.size / 2, character.position.y, GameManager.inst.playerState.mapRow - coord.y)
-        character.setPosition(v3(position.x + BuildGameConfig.size / 2, position.y, 0));
+        character.setPosition(v3(position.x, position.y - BuildGameConfig.size / 2, 0));
         return character;
     }
 

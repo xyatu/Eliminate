@@ -116,11 +116,26 @@ export class Builder extends Component {
             let node: Node = this.createBuilding(data);
             this.tryBuild(node, data, true, building.coord);
             node.getComponent(BuildingState).unSelect();
-        })
+        });
+
+        BuildGameUtil.saveBuilding();
     }
 
     adsorption(building: Node) {
         let coord: Coordinate = BuildMapManager.getCoord(building.position.x, building.position.y + BuildGameConfig.size / 2);
+        let pos: Vec3 = building.position;
+        if (pos.x > BuildMapManager.getPos(GameManager.inst.playerState.mapCol - 1, GameManager.inst.playerState.mapRow - 1).x) {
+            coord = BuildMapManager.getCoord(BuildMapManager.getPos(GameManager.inst.playerState.mapCol - 1, GameManager.inst.playerState.mapRow - 1).x, building.position.y + BuildGameConfig.size / 2);
+        }
+        if (pos.y > BuildMapManager.getPos(GameManager.inst.playerState.mapCol - 1, GameManager.inst.playerState.mapRow - 1).y) {
+            coord = BuildMapManager.getCoord(building.position.x, BuildMapManager.getPos(GameManager.inst.playerState.mapCol - 1, GameManager.inst.playerState.mapRow - 1).y + BuildGameConfig.size / 2);
+        }
+        if (pos.x < BuildMapManager.getPos(0, 0).x) {
+            coord = BuildMapManager.getCoord(BuildMapManager.getPos(0, 0).x, building.position.y + BuildGameConfig.size / 2);
+        }
+        if (pos.y < BuildMapManager.getPos(0, 0).y) {
+            coord = BuildMapManager.getCoord(building.position.x, BuildMapManager.getPos(0, 0).y + BuildGameConfig.size / 2);
+        }
         building.setPosition(BuildMapManager.getPos(coord).x, BuildMapManager.getPos(coord).y - BuildGameConfig.size / 2, 0);
     }
 
@@ -138,8 +153,8 @@ export class Builder extends Component {
 
         building.getComponent(BuildingState).data = data;
         building.getComponent(Sprite).spriteFrame = data.anim.anim[0];
-        building.getComponent(UITransform).width = this.findLongestArrayLength(data.buildShape) * 64;
-        building.getComponent(UITransform).height = data.buildShape.length * 64;
+        building.getComponent(UITransform).width = data.anim.anim[0].originalSize.width * 4;
+        building.getComponent(UITransform).height = data.anim.anim[0].originalSize.height * 4;
 
         let pos = building.position;
         let size = building.getComponent(UITransform).contentSize;
@@ -161,6 +176,7 @@ export class Builder extends Component {
 
         if (this.buildCheckVoid(data, pos, building)) {
             this.build(data, building, pos, isLoad);
+            // log(pos);
             return true;
         }
         else {
@@ -231,40 +247,40 @@ export class Builder extends Component {
         // 根据index得到对应的小元件表
         let widget: number[] = autoTileMap[index];
         // 根据小元件表拼接成地图元件
-        for (let index = 0; index < 4; index++) {
-            building.getChildByName('Sprite').children[index].getComponent(Sprite).spriteFrame = data.anim.anim[widget[index]];
+        for (let i = 0; i < 4; i++) {
+            building.getChildByName('Sprite').children[i].getComponent(Sprite).spriteFrame = data.anim.anim[widget[i]];
         }
     }
     updateTileState(data: Building, row: number, col: number, type: number, building: Node) {
 
         // log(`data: ${BuildMapManager.dataMapDit[type][row][col]}, row: ${row}, col: ${col}, change: ${BuildMapManager.dataMapDit[type][col][row]}`)
         // 如果该位置没有地图元件，则直接返回
-        if (!this.hasTileAt(row, col, type)) return;
+        if (!this.hasTileAt(data, row, col, type)) return;
 
         let state: number = 0b00000000;
 
-        if (this.hasTileAt(row + 1, col, type)) {
+        if (this.hasTileAt(data, row + 1, col, type)) {
             state |= 0b01000000;
         }
-        if (this.hasTileAt(row - 1, col, type)) {
+        if (this.hasTileAt(data, row - 1, col, type)) {
             state |= 0b00000010;
         }
-        if (this.hasTileAt(row, col - 1, type)) {
+        if (this.hasTileAt(data, row, col - 1, type)) {
             state |= 0b00010000;
         }
-        if (this.hasTileAt(row, col + 1, type)) {
+        if (this.hasTileAt(data, row, col + 1, type)) {
             state |= 0b00001000;
         }
-        if (this.hasTileAt(row + 1, col - 1, type)) {
+        if (this.hasTileAt(data, row + 1, col - 1, type)) {
             if ((state | 0b01010000) == state) state |= 0b10000000;
         }
-        if (this.hasTileAt(row + 1, col + 1, type)) {
+        if (this.hasTileAt(data, row + 1, col + 1, type)) {
             if ((state | 0b01001000) == state) state |= 0b00100000;
         }
-        if (this.hasTileAt(row - 1, col - 1, type)) {
+        if (this.hasTileAt(data, row - 1, col - 1, type)) {
             if ((state | 0b00010010) == state) state |= 0b00000100;
         }
-        if (this.hasTileAt(row - 1, col + 1, type)) {
+        if (this.hasTileAt(data, row - 1, col + 1, type)) {
             if ((state | 0b00001010) == state) state |= 0b00000001;
         }
 
@@ -324,10 +340,14 @@ export class Builder extends Component {
 
         // 判断其周围8个格子的状态state
         // 根据判断的状态确定情况的编号index
-        this.drawTileIndex(data, index, building);
+        this.drawTileIndex(data, index, BuildMapManager.nodeMapDit[type][row][col]);
     }
-    hasTileAt(row: number, col: number, type: number) {
-        if (col < GameManager.inst.playerState.mapRow && col >= 0 && row < GameManager.inst.playerState.mapCol && row >= 0) return BuildMapManager.buildMapDit[type][row][col] == 2;
+    hasTileAt(data: Building, row: number, col: number, type: number) {
+        if (col < GameManager.inst.playerState.mapRow && col >= 0 && row < GameManager.inst.playerState.mapCol && row >= 0) {
+            return BuildMapManager.nodeMapDit[type][row][col] &&
+                BuildMapManager.nodeMapDit[type][row][col].getComponent(BuildingState).data.autoTile === 1 &&
+                BuildMapManager.nodeMapDit[type][row][col].getComponent(BuildingState).data.id === data.id;
+        }
         else return false;
 
     }
@@ -341,7 +361,7 @@ export class Builder extends Component {
             if (newX < GameManager.inst.playerState.mapRow && newX >= 0 && newY < GameManager.inst.playerState.mapCol && newY >= 0) {
                 let node = Coord(newX, newY).getNode(type);
                 if (node) {
-                    if (data.autoTile == 2) {
+                    if (BuildMapManager.nodeMapDit[type][newY][newX].getComponent(BuildingState).data.autoTile === 2) {
                         this.updateFence(data, Coord(newX, newY), data.layer, node);
                     }
                 }
@@ -353,7 +373,7 @@ export class Builder extends Component {
     }
 
     updateFence(data: Building, coord: Coordinate, type: number, building: Node) {
-        let direction: { [key: number]: Node } = {
+        let direction: { [key: number]: boolean } = {
             0: null,
             1: null,
             2: null,
@@ -366,15 +386,20 @@ export class Builder extends Component {
             const newY = coord.y + directions_Four[index].dy;
 
             if (newX < GameManager.inst.playerState.mapRow && newX >= 0 && newY < GameManager.inst.playerState.mapCol && newY >= 0) {
-                direction[index] = Coord(newX, newY).getNode(type);
+                if (Coord(newX, newY).getNode(type)) {
+                    direction[index] = Coord(newX, newY).getNode(type).getComponent(BuildingState).data.autoTile === 2;
+                }
+                else {
+                    direction[index] = false;
+                }
             }
         }
 
         // 记录有节点的方向
-        let up = direction[0] !== null;
-        let down = direction[1] !== null;
-        let left = direction[2] !== null;
-        let right = direction[3] !== null;
+        let up = direction[0];
+        let down = direction[1];
+        let left = direction[2];
+        let right = direction[3];
 
         let index: number = fence['on_alone'];
 
@@ -432,6 +457,9 @@ export class Builder extends Component {
     changeMap(data: Building, coord: Coordinate, isBuild: boolean, isLoad: boolean) {
 
         if (!isLoad) {
+
+            if (GameManager.inst.playerState.building.findIndex(building => building.id === data.id && building.coord.compare(coord)) != -1) return;
+
             GameManager.inst.changeMap(data, coord, isBuild);
 
             BuildGameUtil.saveBuilding();

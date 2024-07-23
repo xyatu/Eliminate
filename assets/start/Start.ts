@@ -1,11 +1,12 @@
-import { _decorator, assetManager, Component, director, game, Label, Prefab, Node, log, SpriteAtlas, warn } from 'cc';
-import { tgxModuleContext, tgxUIMgr } from '../core_tgx/tgx';
+import { _decorator, assetManager, Component, director, game, Label, Prefab, Node, log, SpriteAtlas, warn, AudioClip, NodeEventType, input, Input, SpriteFrame } from 'cc';
+import { tgxAudioMgr, tgxModuleContext, tgxUIMgr } from '../core_tgx/tgx';
 import { GameUILayers, GameUILayerNames } from '../scripts/GameUILayers';
 
 import { ModuleDef } from '../scripts/ModuleDef';
 import { SceneDef } from '../scripts/SceneDef';
 import { Res } from './Res';
-import { DataGetter } from './DataGetter';
+import { DataGetter, Sound } from './DataGetter';
+import { SoundConfig } from './SoundConfig';
 const { ccclass, property } = _decorator;
 
 const _preloadBundles = [ModuleDef.BASIC, ModuleDef.GAME_BUILD, ModuleDef.GAME_ELIMINATE];
@@ -28,6 +29,8 @@ export class Start extends Component {
 
     @property(Node)
     loadingBar: Node;
+
+    loadSequence: boolean[] = [false, false, false];
 
     isDone: boolean = false;
 
@@ -88,8 +91,29 @@ export class Start extends Component {
                                 })
 
                                 warn(`Resources All loaded`);
-                                
-                                this.node.getComponent(DataGetter).loadRes();
+                                this.loadSequence[0] = true;
+                                this.onPreloadingComplete();
+                            })
+
+                            bundle.loadDir<SpriteFrame>('res/spriteFrames', SpriteFrame, (err, data) => {
+                                data.forEach(spriteFrame => {
+                                    Res.spriteFrame[spriteFrame.name] = spriteFrame;
+                                })
+
+                                warn(`Resources All loaded`);
+                                this.loadSequence[2] = true;
+                                this.onPreloadingComplete();
+                            })
+
+                            bundle.loadDir<AudioClip>('Sound', AudioClip, (err, data) => {
+                                data.forEach(audio => {
+                                    Res.audio[audio.name] = audio;
+                                })
+
+                                warn(`Resources All loaded`);
+
+                                this.node.getComponent(DataGetter).loadSound();
+                                this.loadSequence[1] = true;
                                 this.onPreloadingComplete();
                             })
                         }
@@ -105,11 +129,15 @@ export class Start extends Component {
     }
 
     onPreloadingComplete() {
+        if (this.loadSequence.filter(val => !val).length > 0) return;
+
+        this.node.getComponent(DataGetter).loadRes();
         let bundle = assetManager.getBundle(ModuleDef.GAME_BUILD);
         bundle.preloadScene(SceneDef.BUILD_GAME, () => {
             this.onResLoaded();
             this.isLoadScene = true;
             director.loadScene(SceneDef.BUILD_GAME, () => {
+
             });
         });
     }

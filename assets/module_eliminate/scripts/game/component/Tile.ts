@@ -1,4 +1,4 @@
-import { _decorator, Component, Sprite, Event, tween, v3, NodeEventType, EventTouch, log, Vec3, UITransform, warn, Tween } from 'cc';
+import { _decorator, Component, Sprite, Event, tween, v3, NodeEventType, EventTouch, log, Vec3, UITransform, warn, Tween, math } from 'cc';
 const { ccclass, property } = _decorator;
 
 import { TileType, TileEvent } from "../type/Enum";
@@ -8,6 +8,9 @@ import PoolManager from "../manager/PoolManager";
 import { GameEvent } from '../../../eazax-ccc/core/GameEvent';
 import TileManager from '../manager/TileManager';
 import { EliminateState } from '../manager/EliminateState';
+import { DataGetter, Sound } from '../../../../start/DataGetter';
+import { SoundConfig } from '../../../../start/SoundConfig';
+import { tgxAudioMgr } from '../../../../core_tgx/tgx';
 
 @ccclass('Tile')
 export default class Tile extends Component {
@@ -162,6 +165,10 @@ export default class Tile extends Component {
      * 消失并回收
      */
     public disappear() {
+        // this.scheduleOnce(() => {
+            let sound: Sound = DataGetter.inst.sound.get(SoundConfig.eliminate_normal);
+            tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
+        // }, math.randomRange(0, 0.1))
         tween(this.node)
             .to(0.1, { scale: v3(0) })
             .call(() => PoolManager.put(this.node))

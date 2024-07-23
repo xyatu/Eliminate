@@ -124,7 +124,6 @@ export default class BuildGameUtil {
         let coord = val.copy();
         GameManager.inst.setPlayerCoord(coord);
         localStorage.setItem(SlotConfig.slot_psCoord, `${coord.x},${coord.y}`);
-        log('save' + val.toString())
     }
 
     public static saveBuilding() {
@@ -154,5 +153,9 @@ export default class BuildGameUtil {
     public static saveMap() {
         localStorage.setItem(SlotConfig.slot_row, GameManager.inst.playerState.mapRow.toString());
         localStorage.setItem(SlotConfig.slot_col, GameManager.inst.playerState.mapCol.toString());
+    }
+
+    public static loadSlot(){
+        return localStorage.getItem(SlotConfig.slot_haveSlot) === SlotConfig.slot_hasSlot;
     }
 }

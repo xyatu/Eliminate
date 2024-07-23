@@ -33,6 +33,7 @@ export class UI_Normal extends tgxUIController {
         let layout = this.layout as Layout_Normal;
         // profiler.hideStats();
         this.onButtonEvent(layout.build, () => {
+            GameManager.inst.playClick();
             if (Layout_BuildFrame.inst) {
                 Layout_BuildFrame.inst.show();
             }
@@ -47,6 +48,7 @@ export class UI_Normal extends tgxUIController {
         })
 
         this.onButtonEvent(layout.eliminate, () => {
+            GameManager.inst.playClick();
             assetManager.loadBundle(ModuleDef.GAME_ELIMINATE, (err, bundle: AssetManager.Bundle) => {
                 if (bundle) {
                     director.loadScene(SceneDef.ELIMINATE_GAME, () => {
@@ -82,7 +84,6 @@ export class UI_Normal extends tgxUIController {
 
     onGoldChange(gold: number) {
         let self = this as unknown as Layout_Normal;
-        log(gold.toString().length)
         if (self.gold.children.length < gold.toString().length) {
             let len: number = self.gold.children.length;
             for (let index = 0; index < gold.toString().length - len; index++) {

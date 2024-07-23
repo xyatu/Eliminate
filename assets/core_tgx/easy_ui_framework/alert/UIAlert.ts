@@ -1,3 +1,6 @@
+import { DataGetter, Sound } from "../../../start/DataGetter";
+import { SoundConfig } from "../../../start/SoundConfig";
+import { tgxAudioMgr } from "../../tgx";
 import { UIController } from "../UIController";
 import { UIMgr } from "../UIMgr";
 import { Layout_UIAlert } from "./Layout_UIAlert";
@@ -61,6 +64,8 @@ export class UIAlert extends UIController {
         });
 
         this.onButtonEvent(layout.btnCancel, () => {
+            let sound: Sound = DataGetter.inst.sound.get(SoundConfig.click);
+            tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
             this.hide();
             let options = this._options as any as { _cbClick: Function, _cbClickThisArg: any };
             if (options._cbClick) {

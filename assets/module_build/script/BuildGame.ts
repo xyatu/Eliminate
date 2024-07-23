@@ -1,5 +1,5 @@
-import { _decorator, Component, Contact2DType, director, Label, log, Node, PhysicsSystem2D } from 'cc';
-import { tgxUIEditAlert, tgxUIMgr } from '../../core_tgx/tgx';
+import { _decorator, Component, Contact2DType, director, Input, input, Label, log, Node, PhysicsSystem2D } from 'cc';
+import { tgxAudioMgr, tgxUIEditAlert, tgxUIMgr } from '../../core_tgx/tgx';
 import { UI_MapGrid } from '../ui/map/UI_MapGrid';
 import { UI_BuildFrame } from '../ui/ui_buildFrame/UI_BuildFrame';
 import BuildMapManager from './manager/BuildMapManager';
@@ -9,6 +9,8 @@ import { Builder } from './manager/Builder';
 import { GameManager } from '../../start/GameManager';
 import { Layout_Normal } from '../ui/ui_normal/Layout_Normal';
 import { Layout_BuildFrame } from '../ui/ui_buildFrame/Layout_BuildFrame';
+import { DataGetter, Sound } from '../../start/DataGetter';
+import { SoundConfig } from '../../start/SoundConfig';
 const { ccclass, property } = _decorator;
 
 @ccclass('game')
@@ -42,6 +44,10 @@ export class BuildGame extends Component {
                 this.changeGold(0);
             })
         });
+
+        tgxAudioMgr.inst.stop();
+        let buildBG: Sound = DataGetter.inst.sound.get(SoundConfig.buildBg);
+        tgxAudioMgr.inst.play(buildBG.audio, buildBG.volumn, true);
     }
 
     loadMap() {

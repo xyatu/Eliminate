@@ -19,9 +19,9 @@ export default class GameConfig {
         [TileType.H]: 30,
         [TileType.I]: 30,
         [TileType.J]: 30,
-        [TileType.Ver]: 1,
-        [TileType.Hori]: 1,
-        [TileType.Matrix]: 1,
+        [TileType.Ver]: 100,
+        [TileType.Hori]: 100,
+        [TileType.Matrix]: 100,
         [TileType.Z]: 0
     };
     public static eliminateScore: number = 10;

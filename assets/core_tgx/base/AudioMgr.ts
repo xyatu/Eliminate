@@ -73,9 +73,10 @@ export class AudioMgr {
      * @param sound clip or url for the sound
      * @param volume 
      */
-    play(sound: AudioClip | string, volume: number = 1.0, bundleName:string = 'resources') {
+    play(sound: AudioClip | string, volume: number = 1.0, isLoop: boolean, bundleName:string = 'resources') {
         if (sound instanceof AudioClip) {
             this._audioSource.clip = sound;
+            this._audioSource.loop = isLoop;
             this._audioSource.play();
             this.audioSource.volume = volume;
         }
@@ -87,6 +88,7 @@ export class AudioMgr {
                 }
                 else {
                     this._audioSource.clip = clip;
+                    this._audioSource.loop = isLoop;
                     this._audioSource.play();
                     this.audioSource.volume = volume;
                 }

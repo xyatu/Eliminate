@@ -12,6 +12,10 @@ import { GameEvent } from "../../../eazax-ccc/core/GameEvent";
 import ResManager from './ResManager';
 import { UI_Eliminate } from '../../../ui_eliminate/UI_Eliminate';
 import { EliminateState } from './EliminateState';
+import { GameManager } from '../../../../start/GameManager';
+import { DataGetter, Sound } from '../../../../start/DataGetter';
+import { tgxAudioMgr } from '../../../../core_tgx/tgx';
+import { SoundConfig } from '../../../../start/SoundConfig';
 
 @ccclass('TileManager')
 export default class TileManager extends Component {
@@ -90,6 +94,7 @@ export default class TileManager extends Component {
      * @param pos 点击位置
      */
     private onTileTouchStart(coord: Coordinate, pos: Vec2) {
+        GameManager.inst.playClick();
         log('点击 | coord: ' + coord.toString() + ' | type: ' + this.getType(coord));
         // 是否已经选中了方块
         if (!this.selectedCoord) {
@@ -219,7 +224,7 @@ export default class TileManager extends Component {
      */
     private async tryEliminate(coord?: Coordinate) {
         if (coord) {
-            this.eliminateTileVerOrHori(coord.copy());
+            if (this.eliminateTileVerOrHori(coord.copy())) GameUtil.changeScore(10500);
         }
 
         // 获取可消除组合
@@ -278,6 +283,9 @@ export default class TileManager extends Component {
 
         let tile2Type = this.getType(coord2);
 
+        if (tile1 && tile1.tween) tile1.tween.stop();
+        if (tile2 && tile2.tween) tile2.tween.stop();
+
         // 交换数据
         if (tile1) tile1.setCoord(coord2);
 
@@ -303,13 +311,19 @@ export default class TileManager extends Component {
      * 消除组合
      */
     private eliminateCombinations() {
+        let sound: Sound = DataGetter.inst.sound.get(SoundConfig.eliminate_normal);
+        tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
         for (let i = 0; i < this.combinations.length; i++) {
-            GameUtil.changeScore((GameConfig.eliminateScore * this.combinations[i].coords.length) * (1 + i * 0.2));
+            GameUtil.changeScore((this.calcScore(this.combinations[i].coords.length)) * (1 + i * 0.2));
             for (let j = 0; j < this.combinations[i].coords.length; j++) {
                 this.eliminateTile(this.combinations[i].coords[j]);
             }
         }
         this.combinations = [];
+    }
+
+    calcScore(n: number): number {
+        return n <= 3 ? 800 : (n - 3) * (n - 3) * 300 + (n - 3) * 500 + 500;
     }
 
     /**
@@ -371,57 +385,72 @@ export default class TileManager extends Component {
      * 消除方块
      * @param coord 坐标
      */
-    private eliminateTileVerOrHori(coord: Coordinate) {
+    private eliminateTileVerOrHori(coord: Coordinate): boolean {
         switch (this.getType(coord)) {
             case TileType.Ver:
-                for (let index = 0; index < GameConfig.row; index++) { // 修正列索引为行索引
-                    if (this.getType(coord.x, index)) {
-                        if (this.getType(coord.x, index) == TileType.Hori || this.getType(index, coord.y) == TileType.Matrix) {
-                            this.eliminateTileVerOrHori(Coord(coord.x, index));
+                {
+                    let sound: Sound = DataGetter.inst.sound.get(SoundConfig.eliminate_Ver);
+                    tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
+
+                    for (let index = 0; index < GameConfig.row; index++) { // 修正列索引为行索引
+                        if (this.getType(coord.x, index)) {
+                            if (this.getType(coord.x, index) == TileType.Hori || this.getType(index, coord.y) == TileType.Matrix) {
+                                this.eliminateTileVerOrHori(Coord(coord.x, index));
+                            }
+                            this.eliminateTile(Coord(coord.x, index));
                         }
-                        this.eliminateTile(Coord(coord.x, index));
                     }
+                    return true;
                 }
-                return;
             case TileType.Hori:
-                for (let index = 0; index < GameConfig.col; index++) { // 保持列索引不变
-                    if (this.getType(index, coord.y)) {
-                        if (this.getType(index, coord.y) == TileType.Ver || this.getType(index, coord.y) == TileType.Matrix) {
-                            this.eliminateTileVerOrHori(Coord(index, coord.y));
+                {
+                    let sound: Sound = DataGetter.inst.sound.get(SoundConfig.eliminate_Hori);
+                    tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
+
+                    for (let index = 0; index < GameConfig.col; index++) { // 保持列索引不变
+                        if (this.getType(index, coord.y)) {
+                            if (this.getType(index, coord.y) == TileType.Ver || this.getType(index, coord.y) == TileType.Matrix) {
+                                this.eliminateTileVerOrHori(Coord(index, coord.y));
+                            }
+                            this.eliminateTile(Coord(index, coord.y));
                         }
-                        this.eliminateTile(Coord(index, coord.y));
                     }
+                    return true;
                 }
-                return;
             case TileType.Matrix:
+                {
+                    let sound: Sound = DataGetter.inst.sound.get(SoundConfig.eliminate_Matrix);
+                    tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
+                    this.eliminateTile(Coord(coord.x, coord.y));
+                    const directions = [
+                        { dx: -1, dy: -1 }, // 左上
+                        { dx: 0, dy: -1 },  // 上
+                        { dx: 1, dy: -1 },  // 右上
+                        { dx: -1, dy: 0 },  // 左
+                        { dx: 1, dy: 0 },   // 右
+                        { dx: -1, dy: 1 },  // 左下
+                        { dx: 0, dy: 1 },   // 下
+                        { dx: 1, dy: 1 }    // 右下
+                    ];
 
-                this.eliminateTile(Coord(coord.x, coord.y));
-                const directions = [
-                    { dx: -1, dy: -1 }, // 左上
-                    { dx: 0, dy: -1 },  // 上
-                    { dx: 1, dy: -1 },  // 右上
-                    { dx: -1, dy: 0 },  // 左
-                    { dx: 1, dy: 0 },   // 右
-                    { dx: -1, dy: 1 },  // 左下
-                    { dx: 0, dy: 1 },   // 下
-                    { dx: 1, dy: 1 }    // 右下
-                ];
+                    for (const direction of directions) {
+                        const newX = coord.x + direction.dx;
+                        const newY = coord.y + direction.dy;
 
-                for (const direction of directions) {
-                    const newX = coord.x + direction.dx;
-                    const newY = coord.y + direction.dy;
-
-                    // 检查是否在边界内
-                    if (newX >= 0 && newX < GameConfig.row && newY >= 0 && newY < GameConfig.col) {
-                        if (this.getType(newX, newY) == TileType.Ver ||
-                            this.getType(newX, newY) == TileType.Hori ||
-                            this.getType(newX, newY) == TileType.Matrix) {
-                            this.eliminateTileVerOrHori(Coord(newX, newY));
+                        // 检查是否在边界内
+                        if (newX >= 0 && newX < GameConfig.row && newY >= 0 && newY < GameConfig.col) {
+                            if (this.getType(newX, newY) == TileType.Ver ||
+                                this.getType(newX, newY) == TileType.Hori ||
+                                this.getType(newX, newY) == TileType.Matrix) {
+                                this.eliminateTileVerOrHori(Coord(newX, newY));
+                            }
+                            this.eliminateTile(Coord(newX, newY));
                         }
-                        this.eliminateTile(Coord(newX, newY));
                     }
+                    return true;
                 }
-                return;
+
+            default: return false;
         }
     }
 
@@ -504,7 +533,6 @@ export default class TileManager extends Component {
                         }
                         // 找到可以用的方块
                         if (this.getType(c, nr)) {
-                            this.getTile(c, nr).isFalling = true;
 
                             // 转移数据
                             this.setType(c, r, this.getType(c, nr));
@@ -517,15 +545,14 @@ export default class TileManager extends Component {
                             let fallPos = MapManager.getPos(c, r);
                             let fallTime = (nr - r) * 0.1;
                             promises.push(new Promise(res => {
-                                tween(this.getTile(c, r).node)
-                                    .to(fallTime, { position: v3(fallPos.x, fallPos.y - 10, 0) })
+                                this.getTile(c, r).tween = tween(this.getTile(c, r).node)
+                                    .to(fallTime / 2, { position: v3(fallPos.x, fallPos.y - 10, 0) })
                                     .to(0.05, { position: v3(fallPos.x, fallPos.y, 0) })
                                     .call(() => {
                                         for (let c = 0; c < GameConfig.col; c++) {
                                             for (let r = 0; r < GameConfig.row; r++) {
                                                 if (this.getType(c, r)) {
                                                     try {
-                                                        this.getTile(c, nr).isFalling = false;
                                                         this.getTile(c, r).node.setPosition(v3(MapManager.getPos(c, r).x, MapManager.getPos(c, r).y, 0))
                                                     } catch (error) {
 
