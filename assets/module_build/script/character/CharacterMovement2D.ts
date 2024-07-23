@@ -3,6 +3,7 @@ import { EasyController, EasyControllerEvent } from './EasyController';
 import { CharacterFSM, Direction } from './CharacterFSM';
 import { GridMovement } from './GridMovement';
 import BuildGameConfig from '../data/BuildGameConfig';
+import { CharacterState } from './CharacterState';
 const { ccclass, property } = _decorator;
 
 const tempV2 = v2();
@@ -67,6 +68,9 @@ export class CharacterMovement2D extends Component {
             this.node.getComponent(CharacterFSM).playAnimationForDirection(direction);
             // this.node.setPosition(pos.x + tempV2.x, pos.y + tempV2.y, pos.z);
             this.node.getComponent(GridMovement).CharacterMove(direction);
+        }
+        if (!this.node.getComponent(CharacterState).isMoving) {
+            this.node.getComponent(CharacterFSM).playAnimationForDirection(Direction.None)
         }
     }
 

@@ -57,7 +57,7 @@ export class GridMovement extends Component {
 
             this.resetLayer();
             tween(this.node)
-                .to(this.node.getComponent(CharacterState).moveTime, { position: v3(BuildMapManager.getPos(target).x, BuildMapManager.getPos(target).y - BuildGameConfig.size / 2, 0) })
+                .to(this.node.getComponent(CharacterState).role.moveTime, { position: v3(BuildMapManager.getPos(target).x, BuildMapManager.getPos(target).y - BuildGameConfig.size / 2, 0) })
                 .then(tween().call(() => {
                     this.node.getComponent(CharacterState).isMoving = false;
                     if (this.willStop) this.node.getComponent(CharacterFSM).playAnimationForDirection(Direction.None);
@@ -80,7 +80,7 @@ export class GridMovement extends Component {
             this.node.getComponent(CharacterState).characterCoord = target.copy();
             this.resetLayer();
             tween(this.node)
-                .to(this.node.getComponent(CharacterState).moveTime, { position: v3(BuildMapManager.getPos(target).x, BuildMapManager.getPos(target).y - BuildGameConfig.size / 2, 0) })
+                .to(this.node.getComponent(CharacterState).role.moveTime, { position: v3(BuildMapManager.getPos(target).x, BuildMapManager.getPos(target).y - BuildGameConfig.size / 2, 0) })
                 .then(tween().call(() => {
                     this.node.getComponent(CharacterState).isMoving = false;
                     this.node.getComponent(AIController).resetMoveTarget();

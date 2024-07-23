@@ -6,13 +6,14 @@ const { ccclass, property } = _decorator;
 @ccclass
 export class FrameAnimation extends Component {
 
+    @property(SpriteFrame)
     protected spriteFrame: SpriteFrame[] = [];
 
     protected rate: number = 0.05;
 
     protected loop: boolean = false;
 
-    protected runAtStart: boolean = false;
+    protected runAtStart: boolean = true;
 
     protected completeCallback: Array<EventHandler> = [];
 
@@ -41,6 +42,7 @@ export class FrameAnimation extends Component {
     }
 
     protected start(): void {
+        this.frameCount = this.spriteFrame.length;
         if (this.runAtStart) {
             this.Play(this.Loop);
         }
@@ -78,7 +80,7 @@ export class FrameAnimation extends Component {
             error("atlas not exist!")
             return;
         }
-        let sprite = this.node.getChildByName('Sprite').getComponent(Sprite);
+        let sprite = this.node.getComponent(Sprite);
         sprite.spriteFrame = this.spriteFrame[this.currentIndex];
         ++this.currentIndex;
     }

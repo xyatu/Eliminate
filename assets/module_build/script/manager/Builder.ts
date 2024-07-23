@@ -153,8 +153,14 @@ export class Builder extends Component {
 
         building.getComponent(BuildingState).data = data;
         building.getComponent(Sprite).spriteFrame = data.anim.anim[0];
-        building.getComponent(UITransform).width = data.anim.anim[0].originalSize.width * 4;
-        building.getComponent(UITransform).height = data.anim.anim[0].originalSize.height * 4;
+        if (data.autoTile !== 1) {
+            building.getComponent(UITransform).width = data.anim.anim[0].originalSize.width * 4;
+            building.getComponent(UITransform).height = data.anim.anim[0].originalSize.height * 4;
+        }
+        else {
+            building.getComponent(UITransform).width = 64;
+            building.getComponent(UITransform).height = 64;
+        }
 
         let pos = building.position;
         let size = building.getComponent(UITransform).contentSize;
@@ -458,7 +464,7 @@ export class Builder extends Component {
 
         if (!isLoad) {
 
-            if (GameManager.inst.playerState.building.findIndex(building => building.id === data.id && building.coord.compare(coord)) != -1) return;
+            if (GameManager.inst.playerState.building.findIndex(building => building.id === data.id && building.coord.compare(coord)) != -1 && isBuild) return;
 
             GameManager.inst.changeMap(data, coord, isBuild);
 
