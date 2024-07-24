@@ -36,8 +36,8 @@ export default class MapManager {
     private static generatePosMap() {
         this._posMap = [];
         // 计算宽高
-        this.width = (GameConfig.padding * 2) + (GameConfig.size * GameConfig.col) + (GameConfig.spacing * (GameConfig.col - 1));
-        this.height = (GameConfig.padding * 2) + (GameConfig.size * GameConfig.row) + (GameConfig.spacing * (GameConfig.row - 1));
+        this.width = (GameConfig.padding * 2) + (GameConfig.size * GameConfig.col) + (GameConfig.spacingX * (GameConfig.col - 1));
+        this.height = (GameConfig.padding * 2) + (GameConfig.size * GameConfig.row) + (GameConfig.spacingY * (GameConfig.row - 1));
         // 以左下角为原点，计算第一个方块的位置
         this.beginX = -(this.width / 2) + GameConfig.padding + (GameConfig.size / 2);
         this.beginY = -(this.height / 2) + GameConfig.padding + (GameConfig.size / 2);
@@ -45,10 +45,10 @@ export default class MapManager {
         // 从左到右计算每一列方块的位置
         for (let c = 0; c < GameConfig.col; c++) {
             let colSet = [];
-            let x = this.beginX + c * (GameConfig.size + GameConfig.spacing);
+            let x = this.beginX + c * (GameConfig.size + GameConfig.spacingX);
             // 从下到上计算该列的每一个方块的位置
             for (let r = 0; r < GameConfig.row; r++) {
-                let y = this.beginY + r * (GameConfig.size + GameConfig.spacing);
+                let y = this.beginY + r * (GameConfig.size + GameConfig.spacingY);
                 colSet.push(v2(x, y));
             }
             this._posMap.push(colSet);

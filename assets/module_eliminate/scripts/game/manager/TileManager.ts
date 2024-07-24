@@ -128,12 +128,12 @@ export default class TileManager extends Component {
     }
 
     changeFallInterval(dt) {
-        if (this.autoFallInterval > 0.1) {
+        if (this.autoFallInterval > 0.05) {
             this.timeTick += dt;
             if (this.timeTick >= GameConfig.changeFallIntervalval) {
                 this.timeTick -= GameConfig.changeFallIntervalval;
                 this.autoFallInterval -= 0.02;
-                if (this.autoFallInterval < 0.1) this.autoFallInterval = 0.1;
+                if (this.autoFallInterval < 0.05) this.autoFallInterval = 0.05;
             }
         }
     }
@@ -570,7 +570,7 @@ export default class TileManager extends Component {
                             this.setType(c, nr, null);
                             // 下落
                             let fallPos = MapManager.getPos(c, r);
-                            let fallTime = (nr - r) * 0.1;
+                            let fallTime = (nr - r) * 0.05;
                             promises.push(new Promise(res => {
                                 this.getTile(c, r).tween = tween(this.getTile(c, r).node)
                                     .to(fallTime / 2, { position: v3(fallPos.x, fallPos.y - 10, 0) })
