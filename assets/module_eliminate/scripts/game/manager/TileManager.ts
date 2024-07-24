@@ -249,7 +249,7 @@ export default class TileManager extends Component {
             await new Promise(res => setTimeout(res, 250));
             this.eliminateCombinations(); // 消除
             await new Promise(res => setTimeout(res, 250));
-            // await this.falldown(); // 下落
+            this.falldown();
             await new Promise(res => setTimeout(res, 250));
             // await this.fillEmpty(); // 填充
             await new Promise(res => setTimeout(res, 250));

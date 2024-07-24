@@ -1,4 +1,4 @@
-import { _decorator, Component, Contact2DType, director, Input, input, instantiate, Label, log, Node, PhysicsSystem2D, Prefab } from 'cc';
+import { _decorator, Component, Contact2DType, director, Input, input, instantiate, Label, log, Node, PhysicsSystem2D, Prefab, v3 } from 'cc';
 import { tgxAudioMgr, tgxUIEditAlert, tgxUIMgr } from '../../core_tgx/tgx';
 import BuildGameUtil from './BuildGameUtil';
 import { Builder } from './manager/Builder';
@@ -11,6 +11,7 @@ import { UI_BuildFrame, UI_MapGrid, UI_Normal } from '../../scripts/UIDef';
 import BuildMapManager from './manager/BuildMapManager';
 import BuildGameConfig_Impl from './data/BuildGameConfig';
 import BuildingPool from '../../scripts/BuildingPool';
+import { Layout_MapGrid } from '../ui/map/Layout_MapGrid';
 const { ccclass, property } = _decorator;
 
 @ccclass('game')
@@ -40,14 +41,16 @@ export class BuildGame extends Component {
     start() {
         // BuildGameUtil.initWallMap();
         this.stateInit();
+        tgxUIMgr.inst.showUI(UI_MapGrid, () => {
+            Layout_MapGrid.inst.node.scale = v3(0.5, 0.5, 1);
+            this.loadMap();
+        });
         BuildMapManager.init();
         tgxUIMgr.inst.showUI(UI_BuildFrame, () => {
             tgxUIMgr.inst.showUI(UI_Normal, () => {
                 this.changeGold(0);
+                Layout_Normal.inst.node.active = false;
             })
-        });
-        tgxUIMgr.inst.showUI(UI_MapGrid, () => {
-            this.loadMap();
         });
 
         tgxAudioMgr.inst.stop();

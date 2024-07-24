@@ -12,6 +12,7 @@ import { GameManager, PlayerState } from '../../../start/GameManager';
 import { UI_MapGrid } from '../../../scripts/UIDef';
 import BuildMapManager from '../../script/manager/BuildMapManager';
 import { Builder } from '../../script/manager/Builder';
+import { BuildGame } from '../../script/BuildGame';
 const { ccclass, property } = _decorator;
 
 @ccclass('Map')
@@ -58,16 +59,10 @@ export class UI_MapGrid_Impl extends UI_MapGrid {
 
         this.node.on(NodeEventType.TOUCH_MOVE, this.touchMove, this, false);
         this.node.on(NodeEventType.MOUSE_WHEEL, this.mouseWheel, this, false);
-
-        let coord: Coordinate = GameManager.inst.playerState.playerCoord;
-        if (!coord) coord = Coord(Math.floor(GameManager.inst.playerState.mapCol / 2), Math.floor(GameManager.inst.playerState.mapRow / 2));
-        CharacterManager.createCharacter(true, coord);
-
-        this.onFollow(0.01, v2(-BuildMapManager.getPos(coord).x + BuildGameConfig.size / 2, -BuildMapManager.getPos(coord).y))
     }
 
     touchMove(event: EventTouch) {
-        if (BuilderComp.inst.selectedBuilding) return;
+        if (BuilderComp.inst.selectedBuilding || !Builder.inst.isLoaded) return;
 
         let touches = event.getTouches();
         if (touches.length >= 2) {
@@ -97,6 +92,7 @@ export class UI_MapGrid_Impl extends UI_MapGrid {
     }
 
     mouseWheel(event: EventMouse) {
+        if (BuilderComp.inst.selectedBuilding || BuildGame.inst.isBuild || !Builder.inst.isLoaded) return;
         Layout_MapGrid.inst.onChangeScale(event.getScrollY() > 0);
     }
 

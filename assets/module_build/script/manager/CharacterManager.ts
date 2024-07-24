@@ -11,6 +11,7 @@ import { BuildGame } from '../BuildGame';
 import BuildGameUtil from '../BuildGameUtil';
 import { GridMovement } from '../character/GridMovement';
 import BuildMapManager from './BuildMapManager';
+import { Builder } from './Builder';
 const { ccclass, property } = _decorator;
 
 @ccclass('CharacterManager')
@@ -67,7 +68,7 @@ export class CharacterManager extends Component {
     }
 
     protected update(dt: number): void {
-        if (BuildGame.inst.isBuild) return;
+        if (BuildGame.inst.isBuild || !Builder.inst.isLoaded) return;
         if (GameManager.inst.playerState.prosperous >= this.accumulate) {
             this.timeTick += dt;
             if (this.timeTick >= BuildGameConfig.NPCSpawnInterval) {

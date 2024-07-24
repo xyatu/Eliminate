@@ -1,4 +1,4 @@
-import { _decorator, Component, find, instantiate, log, Node, Sprite, UITransform, Vec3, view } from "cc";
+import { _decorator, Component, find, instantiate, Layout, log, Node, Sprite, tween, UITransform, v2, v3, Vec3, view } from "cc";
 
 import { Coord, Coordinate } from "../../../scripts/DataStructure";
 import BuildGameConfig from "../../script/data/BuildGameConfig";
@@ -11,6 +11,8 @@ import { GameManager } from "../../../start/GameManager";
 import { BuilderComp } from "./BuilderComp";
 import BuildMapManager from "./BuildMapManager";
 import BuildingPool from "../../../scripts/BuildingPool";
+import { CharacterManager } from "./CharacterManager";
+import { Layout_Normal } from "../../ui/ui_normal/Layout_Normal";
 const { ccclass, property } = _decorator;
 
 const directions = [
@@ -106,6 +108,8 @@ export class Builder extends Component {
 
     static isBuilding: boolean = false;
 
+    isLoaded: boolean = false;
+
     protected onLoad(): void {
         Builder.inst = this;
     }
@@ -116,6 +120,18 @@ export class Builder extends Component {
     loadMap() {
         if (BuildGameConfig.currentIndex >= GameManager.inst.playerState.building.length) {
             BuildGameUtil.saveBuilding(); // 全部加载完毕后保存
+
+            let coord: Coordinate = GameManager.inst.playerState.playerCoord;
+            if (!coord) coord = Coord(Math.floor(GameManager.inst.playerState.mapCol / 2), Math.floor(GameManager.inst.playerState.mapRow / 2));
+            CharacterManager.createCharacter(true, coord);
+
+            Layout_MapGrid.inst.onFollow(0.01, v2(-BuildMapManager.getPos(coord).x + BuildGameConfig.size / 2, -BuildMapManager.getPos(coord).y))
+            Builder.inst.isLoaded = true;
+            Layout_Normal.inst.node.active = true;
+
+            tween(Layout_MapGrid.inst.node)
+                .to(0.5, { scale: v3(1, 1, 1) })
+                .start();
             return;
         }
 
@@ -275,7 +291,7 @@ export class Builder extends Component {
             this.drawAt(data, coord, data.layer, node);
         }
         this.changeMap(data, coord, false, false);
-        
+
         BuildMapManager.RemoveBuildFromMap(node);
     }
 
@@ -396,7 +412,6 @@ export class Builder extends Component {
                 BuildMapManager.nodeMapDit[type][row][col].getComponent(BuildingState).data.id === data.id;
         }
         else return false;
-
     }
 
     drawFence(data: Building, coord: Coordinate, type: number, building: Node) {

@@ -94,7 +94,7 @@ export class BuildingState extends Component {
     }
 
     touchEnd(event: EventTouch) {
-        if (this.origin.subtract(event.getLocation()).length() > 50) return
+        if (this.origin.subtract(event.getLocation()).length() > 50 || !Builder.inst.isLoaded) return
         if (!this.isSelect) {
             let sound: Sound = DataGetter.inst.sound.get(SoundConfig.build_select);
             tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
