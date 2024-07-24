@@ -1,21 +1,21 @@
 import { _decorator, Camera, clamp, Component, director, EventMouse, EventTouch, find, instantiate, Layout, log, Node, NodeEventType, size, tween, UITransform, v2, v3, Vec2, Vec3, view } from 'cc';
-import { tgxUIAlert, tgxUIController } from '../../../core_tgx/tgx';
+import { tgxModuleContext, tgxUIAlert, tgxUIController } from '../../../core_tgx/tgx';
 import { GameUILayers } from '../../../scripts/GameUILayers';
 import { Layout_MapGrid } from './Layout_MapGrid';
 import BuildGameConfig from '../../script/data/BuildGameConfig';
-import { Coord, Coordinate } from '../../../module_eliminate/scripts/game/type/DataStructure';
-import BuildMapManager from '../../script/manager/BuildMapManager';
+import { Coord, Coordinate } from '../../../scripts/DataStructure';
 import BuildGameUtil from '../../script/BuildGameUtil';
 import { UI_Building } from '../ui_building/UI_Building';
-import { Layout_BuildFrame } from '../ui_buildFrame/Layout_BuildFrame';
 import { BuilderComp } from '../../script/manager/BuilderComp';
 import { CharacterManager } from '../../script/manager/CharacterManager';
 import { GameManager, PlayerState } from '../../../start/GameManager';
-import { CharacterState } from '../../script/character/CharacterState';
+import { UI_MapGrid } from '../../../scripts/UIDef';
+import BuildMapManager from '../../script/manager/BuildMapManager';
+import { Builder } from '../../script/manager/Builder';
 const { ccclass, property } = _decorator;
 
 @ccclass('Map')
-export class UI_MapGrid extends tgxUIController {
+export class UI_MapGrid_Impl extends UI_MapGrid {
 
     originalTouchDistance: number = -1;
 
@@ -143,5 +143,5 @@ export class UI_MapGrid extends tgxUIController {
         // }
     }
 }
-
+tgxModuleContext.attachImplClass(UI_MapGrid, UI_MapGrid_Impl);
 

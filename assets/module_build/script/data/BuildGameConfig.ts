@@ -1,6 +1,8 @@
 import { _decorator } from 'cc';
+import { BuildGameConfig } from '../../../scripts/UIDef';
+import { tgxModuleContext } from '../../../core_tgx/tgx';
 
-export default class BuildGameConfig {
+export default class BuildGameConfig_Impl extends BuildGameConfig {
     public static row: number = 10; // 行数
     public static col: number = 10; // 列数
     public static size: number = 64; // 方块的尺寸
@@ -26,10 +28,6 @@ export default class BuildGameConfig {
 
     public static initialRow: number = 0;
 
-    public static autoTileWidth: number = 48;
-    public static autoTileHeight: number = 64;
-    public static autoTileSize: number = 8;
-
     public static mapMinScale: number = 0.5;
     public static mapMaxScale: number = 2;
 
@@ -43,4 +41,9 @@ export default class BuildGameConfig {
     public static SaveGameInterval: number = 1;
 
     public static buttomRole: number = 4;
+
+    public static batchSize: number = 10000;
+    public static currentIndex: number = 0;
 }
+
+tgxModuleContext.attachImplClass(BuildGameConfig, BuildGameConfig_Impl);

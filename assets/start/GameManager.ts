@@ -1,11 +1,11 @@
 // 例如在一个GameManager脚本中处理TouchEnd事件
-import { _decorator, Component, Label, log, Node } from 'cc';
-import { Coord, Coordinate } from '../module_eliminate/scripts/game/type/DataStructure';
+import { _decorator, Component, Label, log, math, Node } from 'cc';
 import { Building, DataGetter, Sound } from './DataGetter';
 import { SlotConfig } from './SlotConfig';
 import { BuildGame } from '../module_build/script/BuildGame';
 import { SoundConfig } from './SoundConfig';
 import { tgxAudioMgr } from '../core_tgx/tgx';
+import { Coord, Coordinate } from '../scripts/DataStructure';
 const { ccclass, property } = _decorator;
 
 export class PlayerState {
@@ -122,12 +122,14 @@ export class GameManager extends Component {
     }
 
     loadPSCoordSlot() {
-        try {
-            let coordStr: string = localStorage.getItem(SlotConfig.slot_psCoord);
+        let coordStr: string = localStorage.getItem(SlotConfig.slot_psCoord);
+        console.log(coordStr)
+        if (coordStr) {
             let info: string[] = coordStr.split(',');
             this.playerState.playerCoord = Coord(parseInt(info[0]), parseInt(info[1]))
-        } catch (error) {
-
+        }
+        else {
+            this.playerState.playerCoord = Coord(Math.ceil(this.playerState.mapRow / 2), Math.ceil(this.playerState.mapCol / 2));
         }
     }
 

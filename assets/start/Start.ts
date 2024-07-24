@@ -7,6 +7,7 @@ import { SceneDef } from '../scripts/SceneDef';
 import { Res } from './Res';
 import { DataGetter, Sound } from './DataGetter';
 import { SoundConfig } from './SoundConfig';
+import BuildingPool from '../scripts/BuildingPool';
 const { ccclass, property } = _decorator;
 
 const _preloadBundles = [ModuleDef.BASIC, ModuleDef.GAME_BUILD, ModuleDef.GAME_ELIMINATE];
@@ -39,6 +40,7 @@ export class Start extends Component {
     private _percent: string = '';
     private _numCurrentLoaded = 0;
     start() {
+        new BuildingPool();
         tgxModuleContext.setDefaultModule(ModuleDef.BASIC);
 
         game.frameRate = 61;
@@ -137,7 +139,7 @@ export class Start extends Component {
             this.onResLoaded();
             this.isLoadScene = true;
             director.loadScene(SceneDef.BUILD_GAME, () => {
-
+                console.log(`loadBuildmap`)
             });
         });
     }

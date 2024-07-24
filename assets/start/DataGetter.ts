@@ -1,9 +1,9 @@
 import { _decorator, Asset, assetManager, AudioClip, Component, log, Node, rect, Rect, sp, SpriteAtlas, SpriteFrame, v2 } from 'cc';
 import { building_data, getbuilding_dataById } from './data/building_data';
 import { Res } from './Res';
-import BuildGameConfig from '../module_build/script/data/BuildGameConfig';
 import { role_data } from './data/role_data';
 import { sound_data } from './data/sound_data';
+import { BuildGameConfig } from '../scripts/UIDef';
 const { ccclass, property } = _decorator;
 
 const direction = ['u', 'd', 'l', 'r'];
@@ -124,7 +124,7 @@ export class DataGetter extends Component {
 
     public static inst: DataGetter;
 
-    buildingdata: Building[] = [];
+    buildingdata: Map<number, Building> = new Map();
     roledata: Role[] = [];
     animdata: SceneAnim[] = [];
     sound: Map<number, Sound> = new Map();
@@ -148,7 +148,7 @@ export class DataGetter extends Component {
             let spriteFrames: SpriteFrame[] = [];
 
             if (data["automatic"] === 1) {
-                log(data["anim"])
+                // log(data["anim"])
                 let spriteFrame: SpriteFrame = Res.spriteFrame[data["anim"]];
                 for (let i = 0; i < BuildGameConfig.autoTileHeight / BuildGameConfig.autoTileSize; i++) {
                     for (let j = 0; j < BuildGameConfig.autoTileWidth / BuildGameConfig.autoTileSize; j++) {
@@ -176,7 +176,7 @@ export class DataGetter extends Component {
                 data["prosperous"],
                 data["price"]);
 
-            this.buildingdata.push(building);
+            this.buildingdata.set(data["id"],building);
         }
     }
 

@@ -1,10 +1,11 @@
 import { _decorator, instantiate, Layout, log, Node, Sprite, v2, v3, Vec2, Vec3 } from 'cc';
-import { Coord, Coordinate } from '../../../module_eliminate/scripts/game/type/DataStructure';
 import BuildGameConfig from '../data/BuildGameConfig';
 import BuildGameUtil from '../BuildGameUtil';
 import { Layout_MapGrid } from '../../ui/map/Layout_MapGrid';
 import { Layout_BuildFrame } from '../../ui/ui_buildFrame/Layout_BuildFrame';
 import { GameManager } from '../../../start/GameManager';
+import { Coordinate } from '../../../scripts/DataStructure';
+import BuildingPool from '../../../scripts/BuildingPool';
 
 export default class BuildMapManager {
 
@@ -42,7 +43,7 @@ export default class BuildMapManager {
         for (let index = 0; index < GameManager.inst.playerState.mapCol; index++) {
             for (let j = 0; j < GameManager.inst.playerState.mapRow; j++) {
                 if (BuildGameUtil.pointIsInsideTargetArea(pos, this._posMap[index][j])) {
-                    return Coord(index, j);
+                    return new Coordinate(index, j);
                 }
             }
         }
@@ -51,6 +52,10 @@ export default class BuildMapManager {
 
     public static getPosArr(): Vec2[][] {
         return this._posMap;
+    }
+
+    public static getNode(type: number, coord: Coordinate): Node {
+        return this.nodeMapDit[type][coord.y][coord.x];
     }
 
     public static checkVoid(type: number, x: number, y: number, building: Node): boolean {
@@ -81,7 +86,7 @@ export default class BuildMapManager {
                     this.buildMapDit[type][coord.y + c][coord.x + r] = buildShape[c][r];
                     this.nodeMapDit[type][coord.y + c][coord.x + r] = node;
                     this.collisionMapDit[type][coord.y + c][coord.x + r] = colShape[c][r];
-                    building.setCoord(Coord(coord.x + r, coord.y + c), buildShape[c][r], colShape[c][r]);
+                    building.setCoord(new Coordinate(coord.x + r, coord.y + c), buildShape[c][r], colShape[c][r]);
                 }
             }
         }
@@ -112,10 +117,8 @@ export default class BuildMapManager {
             }
         }
 
-        // 检查节点是否有效并销毁
-        if (building.isValid) {
-            building.destroy();
-        }
+        
+        BuildingPool.put(building);
     }
 
 

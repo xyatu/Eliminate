@@ -1,5 +1,5 @@
 import { _decorator, AssetManager, assetManager, Component, director, game, Game, instantiate, Layout, log, Node, Sprite } from 'cc';
-import { tgxAudioMgr, tgxUIAlert, tgxUIController, tgxUIMgr } from '../../core_tgx/tgx';
+import { tgxAudioMgr, tgxModuleContext, tgxUIAlert, tgxUIController, tgxUIMgr } from '../../core_tgx/tgx';
 import { GameUILayers } from '../../scripts/GameUILayers';
 import { Layout_Eliminate } from './Layout_Eliminate';
 import { ModuleDef } from '../../scripts/ModuleDef';
@@ -7,14 +7,14 @@ import { SceneDef } from '../../scripts/SceneDef';
 import { DataGetter, Sound } from '../../start/DataGetter';
 import { SoundConfig } from '../../start/SoundConfig';
 import { GameManager } from '../../start/GameManager';
-import { UI_OverComp } from '../scripts/game/component/UI_OverComp';
 import { EliminateState } from '../scripts/game/manager/EliminateState';
+import { UI_Eliminate } from '../../scripts/UIDef';
 const { ccclass, property } = _decorator;
 
 const BundleName = ModuleDef.GAME_ELIMINATE;
 
 @ccclass('UI_Eliminate')
-export class UI_Eliminate extends tgxUIController {
+export class UI_Eliminate_Impl extends UI_Eliminate {
 
     constructor() {
         super('ui_eliminate/UI_Eliminate', GameUILayers.HUD, Layout_Eliminate);
@@ -59,4 +59,4 @@ export class UI_Eliminate extends tgxUIController {
     }
 }
 
-
+tgxModuleContext.attachImplClass(UI_Eliminate, UI_Eliminate_Impl);

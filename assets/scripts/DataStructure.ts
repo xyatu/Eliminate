@@ -2,9 +2,7 @@
 //  * 坐标
 //  */
 import { _decorator, Node } from 'cc';
-import Tile from "../component/Tile";
-import { CombinationType } from "./Enum";
-import BuildMapManager from '../../../../module_build/script/manager/BuildMapManager';
+import { CombinationType } from './Enum';
 
 export class Coordinate {
     public x: number; // 横坐标
@@ -60,10 +58,6 @@ export class Coordinate {
      */
     public toString(): string {
         return '(x:' + this.x + ', ' + 'y:' + this.y + ')';
-    }
-
-    getNode(type: number): Node {
-        return BuildMapManager.nodeMapDit[type][this.y][this.x];
     }
 }
 

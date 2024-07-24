@@ -1,5 +1,4 @@
 import { _decorator, Component, Node, Prefab } from 'cc';
-import BuildMapManager from './BuildMapManager';
 import { BuildingState } from '../building/BuildingState';
 const { ccclass, property } = _decorator;
 

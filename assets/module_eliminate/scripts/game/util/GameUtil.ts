@@ -1,11 +1,10 @@
 import { _decorator, Canvas, director, error, log, UI, UITransform, v2, v3, Vec2, Vec3, view, View, warn } from 'cc';
-import { TileType, SlideDirection } from "../type/Enum";
+import { TileType, SlideDirection } from "../../../../scripts/Enum";
 import GameConfig from "../../data/GameConfig";
-import { Coordinate, Coord, Combination } from "../type/DataStructure";
+import { Coordinate, Coord, Combination } from "../../../../scripts/DataStructure";
 import TileManager from '../manager/TileManager';
 import MapManager from '../manager/MapManager';
 import { EliminateState } from '../manager/EliminateState';
-import { UI_Eliminate } from '../../../ui_eliminate/UI_Eliminate';
 import { Layout_Eliminate } from '../../../ui_eliminate/Layout_Eliminate';
 
 export default class GameUtil {

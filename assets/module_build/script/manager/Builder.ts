@@ -1,7 +1,6 @@
 import { _decorator, Component, find, instantiate, log, Node, Sprite, UITransform, Vec3, view } from "cc";
 
-import { Coord, Coordinate } from "../../../module_eliminate/scripts/game/type/DataStructure";
-import BuildMapManager from "../../script/manager/BuildMapManager";
+import { Coord, Coordinate } from "../../../scripts/DataStructure";
 import BuildGameConfig from "../../script/data/BuildGameConfig";
 import { tgxUIAlert, tgxUIEditAlert } from "../../../core_tgx/tgx";
 import BuildGameUtil from "../../script/BuildGameUtil";
@@ -10,6 +9,8 @@ import { Building, DataGetter } from "../../../start/DataGetter";
 import { Layout_MapGrid } from "../../ui/map/Layout_MapGrid";
 import { GameManager } from "../../../start/GameManager";
 import { BuilderComp } from "./BuilderComp";
+import BuildMapManager from "./BuildMapManager";
+import BuildingPool from "../../../scripts/BuildingPool";
 const { ccclass, property } = _decorator;
 
 const directions = [
@@ -109,16 +110,30 @@ export class Builder extends Component {
         Builder.inst = this;
     }
 
-    loadMap() {
-        GameManager.inst.playerState.building.forEach(building => {
-            let data: Building = DataGetter.inst.buildingdata.find(buildingdata => building.id === buildingdata.id);
-            let node: Node = this.createBuilding(data);
-            this.tryBuild(node, data, true, building.coord);
-            node.getComponent(BuildingState).unSelect();
-        });
-
-        BuildGameUtil.saveBuilding();
+    protected start(): void {
     }
+
+    loadMap() {
+        if (BuildGameConfig.currentIndex >= GameManager.inst.playerState.building.length) {
+            BuildGameUtil.saveBuilding(); // 全部加载完毕后保存
+            return;
+        }
+
+        const endIndex = Math.min(BuildGameConfig.currentIndex + BuildGameConfig.batchSize, GameManager.inst.playerState.building.length);
+
+        for (let i = BuildGameConfig.currentIndex; i < endIndex; i++) {
+            let building = GameManager.inst.playerState.building[i];
+            let data: Building = DataGetter.inst.buildingdata.get(building.id);
+            let node: Node = Builder.inst.createBuilding(data);
+            Builder.inst.tryBuild(node, data, true, building.coord);
+            node.getComponent(BuildingState).unSelect();
+        }
+
+        BuildGameConfig.currentIndex = endIndex;
+
+        // 使用 requestAnimationFrame 在下一帧继续处理
+        requestAnimationFrame(Builder.inst.loadMap);
+    };
 
     adsorption(building: Node) {
         let coord: Coordinate = BuildMapManager.getCoord(building.position.x, building.position.y + BuildGameConfig.size / 2);
@@ -144,7 +159,14 @@ export class Builder extends Component {
     }
 
     createBuilding(data: Building): Node {
-        let building: Node = instantiate(BuilderComp.inst.building);
+
+        let building: Node = null;
+        if (BuildingPool.get()) {
+            building = BuildingPool.get();
+        }
+        else {
+            building = instantiate(BuilderComp.inst.building);
+        }
 
         Layout_MapGrid.inst.node.addChild(building);
 
@@ -199,7 +221,7 @@ export class Builder extends Component {
         }
         else {
             tgxUIAlert.show('格子已被占用或未完全在格内', false).onClick(isOK => {
-                log(`Close`)
+                // log(`Close`)
             });
             return false;
         }
@@ -247,12 +269,13 @@ export class Builder extends Component {
         building.getComponent(BuildingState).coord = coord.copy();
     }
 
-    remove(node: Node, data: Building, coord: Coordinate) {
+    remove(node: Node, data: Building, coord: Coordinate, building: Node) {
+
         if (data.autoTile === 1) {
             this.drawAt(data, coord, data.layer, node);
         }
         this.changeMap(data, coord, false, false);
-
+        
         BuildMapManager.RemoveBuildFromMap(node);
     }
 
@@ -383,7 +406,7 @@ export class Builder extends Component {
             const newY = coord.y + directions_Four[index].dy;
 
             if (newX < GameManager.inst.playerState.mapRow && newX >= 0 && newY < GameManager.inst.playerState.mapCol && newY >= 0) {
-                let node = Coord(newX, newY).getNode(type);
+                let node = BuildMapManager.getNode(type, Coord(newX, newY));
                 if (node) {
                     if (BuildMapManager.nodeMapDit[type][newY][newX].getComponent(BuildingState).data.autoTile === 2) {
                         this.updateFence(data, Coord(newX, newY), data.layer, node);
@@ -410,8 +433,8 @@ export class Builder extends Component {
             const newY = coord.y + directions_Four[index].dy;
 
             if (newX < GameManager.inst.playerState.mapRow && newX >= 0 && newY < GameManager.inst.playerState.mapCol && newY >= 0) {
-                if (Coord(newX, newY).getNode(type)) {
-                    direction[index] = Coord(newX, newY).getNode(type).getComponent(BuildingState).data.autoTile === 2;
+                if (BuildMapManager.getNode(type, Coord(newX, newY))) {
+                    direction[index] = BuildMapManager.getNode(type, Coord(newX, newY)).getComponent(BuildingState).data.autoTile === 2;
                 }
                 else {
                     direction[index] = false;

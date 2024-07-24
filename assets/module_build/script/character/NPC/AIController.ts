@@ -1,12 +1,12 @@
 import { _decorator, Component, log, math, Node, Sprite, SpriteFrame } from 'cc';
-import { Coord, Coordinate } from '../../../../module_eliminate/scripts/game/type/DataStructure';
+import { Coord, Coordinate } from '../../../../scripts/DataStructure';
 import BuildGameConfig from '../../data/BuildGameConfig';
 import { GridMovement } from '../GridMovement';
 import { Direction } from '../CharacterFSM';
 import { CharacterState } from '../CharacterState';
-import BuildMapManager from '../../manager/BuildMapManager';
 import { CharacterManager } from '../../manager/CharacterManager';
 import { GameManager } from '../../../../start/GameManager';
+import BuildMapManager from '../../manager/BuildMapManager';
 const { ccclass, property } = _decorator;
 
 const direction = [

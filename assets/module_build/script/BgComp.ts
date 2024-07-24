@@ -4,12 +4,13 @@ import { tgxUIAlert, tgxUIController } from '../../core_tgx/tgx';
 import BuildGameUtil from './BuildGameUtil';
 import { ModuleDef } from '../../scripts/ModuleDef';
 import { SceneDef } from '../../scripts/SceneDef';
-import BuildMapManager from './manager/BuildMapManager';
+import { Builder } from './manager/Builder';
 const { ccclass, property } = _decorator;
 
 @ccclass('BgComp')
 export class BgComp extends Component {
     buyLand() {
+        if (!Builder.isBuilding) return;
 
         let ps: PlayerState = GameManager.inst.playerState;
 

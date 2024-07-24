@@ -3,10 +3,10 @@ import GameUtil from '../util/GameUtil';
 import { tgxAudioMgr, tgxUIAlert, tgxUIController, tgxUIMgr, tgxUIWaiting } from '../../../../core_tgx/tgx';
 import { SceneDef } from '../../../../scripts/SceneDef';
 import { GameManager } from '../../../../start/GameManager';
-import { UI_OverComp as UI_OverComp } from '../component/UI_OverComp';
 import { SlotConfig } from '../../../../start/SlotConfig';
 import { DataGetter, Sound } from '../../../../start/DataGetter';
 import { SoundConfig } from '../../../../start/SoundConfig';
+import { UI_OverComp } from '../../../../scripts/UIDef';
 const { ccclass, property } = _decorator;
 
 @ccclass('EliminateState')

@@ -1,6 +1,5 @@
 import { _decorator, Component, Node, Prefab, instantiate, Sprite, SpriteFrame, Vec3, Vec2, v3, log, math, BoxCollider2D, v2, size, UITransform } from 'cc';
-import { Coord, Coordinate } from '../../../module_eliminate/scripts/game/type/DataStructure';
-import BuildMapManager from './BuildMapManager';
+import { Coord, Coordinate } from '../../../scripts/DataStructure';
 import { Layout_MapGrid } from '../../ui/map/Layout_MapGrid';
 import { CharacterMovement2D } from '../character/CharacterMovement2D';
 import { AIController } from '../character/NPC/AIController';
@@ -11,6 +10,7 @@ import { GameManager } from '../../../start/GameManager';
 import { BuildGame } from '../BuildGame';
 import BuildGameUtil from '../BuildGameUtil';
 import { GridMovement } from '../character/GridMovement';
+import BuildMapManager from './BuildMapManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('CharacterManager')
@@ -40,6 +40,7 @@ export class CharacterManager extends Component {
             return;
         }
         if (this.inst.cbOnCreateCharacter) {
+            console.log(coord.toString());
             this.inst.cbOnCreateCharacter(isPlayer, coord);
         }
     }

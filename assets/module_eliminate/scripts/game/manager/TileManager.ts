@@ -2,15 +2,14 @@ import { _decorator, Component, Node, Vec2, v3, tween, v2, log, warn, error, ran
 const { ccclass, property } = _decorator;
 
 import Tile from "../component/Tile";
-import { TileType, TileEvent, SlideDirection } from "../type/Enum";
+import { TileType, TileEvent, SlideDirection } from "../../../../scripts/Enum";
 import GameConfig from "../../data/GameConfig";
 import GameUtil from "../util/GameUtil";
 import PoolManager from "./PoolManager";
 import MapManager from "./MapManager";
-import { Coordinate, Combination, Coord } from "../type/DataStructure";
+import { Coordinate, Combination, Coord } from "../../../../scripts/DataStructure";
 import { GameEvent } from "../../../eazax-ccc/core/GameEvent";
 import ResManager from './ResManager';
-import { UI_Eliminate } from '../../../ui_eliminate/UI_Eliminate';
 import { EliminateState } from './EliminateState';
 import { GameManager } from '../../../../start/GameManager';
 import { DataGetter, Sound } from '../../../../start/DataGetter';
@@ -122,7 +121,7 @@ export default class TileManager extends Component {
 
     // private checkTimeTick: number = 0;
     update(dt) {
-        this.falldown();
+        // this.falldown();
 
         this.changeFallInterval(dt);
     }
@@ -168,6 +167,7 @@ export default class TileManager extends Component {
         this.tryEliminate(this.selectedCoord);
         this.tileTouchStartPos = null;
         this.setSelectedTile(null);
+        this.falldown();
     }
 
     /**
@@ -180,6 +180,7 @@ export default class TileManager extends Component {
         this.tryEliminate(this.selectedCoord);
         this.tileTouchStartPos = null;
         this.setSelectedTile(null);
+        this.falldown();
     }
 
     private autoFall() {
@@ -192,6 +193,7 @@ export default class TileManager extends Component {
             let tile = this.getNewTile(c, GameConfig.row - 1, type);
             this.setTile(c, GameConfig.row - 1, tile)
             this.setType(c, GameConfig.row - 1, type);
+            this.falldown();
         }
     }
 

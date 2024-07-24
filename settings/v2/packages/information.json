@@ -18,6 +18,15 @@
         "complete": false,
         "form": "https://creator-api.cocos.com/api/form/show?"
       }
+    },
+    "build-wechatgame": {
+      "id": "build-wechatgame",
+      "label": "build-wechatgame",
+      "enable": false,
+      "build-wechatgame": {
+        "complete": false,
+        "form": "https://creator-api.cocos.com/api/form/show?"
+      }
     }
   }
 }

@@ -1,15 +1,16 @@
 import { _decorator, Button, Component, EventTouch, log, Node, NodeEventType, Sprite, UITransform, v3, Vec2, Vec3 } from 'cc';
 import { Layout_MapGrid } from '../../ui/map/Layout_MapGrid';
-import BuildMapManager from '../manager/BuildMapManager';
 import BuildGameUtil from '../BuildGameUtil';
 import { Building, DataGetter, Sound } from '../../../start/DataGetter';
 import { Builder } from '../manager/Builder';
 import { BuilderComp } from '../manager/BuilderComp';
-import { Coordinate } from '../../../module_eliminate/scripts/game/type/DataStructure';
+import { Coordinate } from '../../../scripts/DataStructure';
 import BuildGameConfig from '../data/BuildGameConfig';
 import { GPDrag } from '../drag/GPDrag';
 import { SoundConfig } from '../../../start/SoundConfig';
 import { tgxAudioMgr } from '../../../core_tgx/tgx';
+import BuildMapManager from '../manager/BuildMapManager';
+import BuildingPool from '../../../scripts/BuildingPool';
 const { ccclass, property } = _decorator;
 
 @ccclass('buildingState')
@@ -81,10 +82,10 @@ export class BuildingState extends Component {
         tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
         this.unSelect();
         if (this.coord) {
-            Builder.inst.remove(this.node, this.data, this.coord);
+            Builder.inst.remove(this.node, this.data, this.coord, this.node);
         }
         else {
-            this.node.destroy();
+            BuildingPool.put(this.node);
         }
     }
 

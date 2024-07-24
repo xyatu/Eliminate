@@ -1,5 +1,5 @@
 import { _decorator, Collider2D, Component, Contact2DType, director, game, IPhysics2DContact, Node, PhysicsSystem2D, SpriteFrame } from 'cc';
-import { Coordinate } from '../../../module_eliminate/scripts/game/type/DataStructure';
+import { Coordinate } from '../../../scripts/DataStructure';
 import { Role } from '../../../start/DataGetter';
 const { ccclass, property } = _decorator;
 

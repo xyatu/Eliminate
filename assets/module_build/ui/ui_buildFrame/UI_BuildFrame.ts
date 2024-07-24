@@ -1,11 +1,9 @@
 import { _decorator, Component, EventMouse, EventTouch, instantiate, log, math, Node, NodeEventType, Rect, Sprite, SpriteFrame, v2, v3 } from 'cc';
 import { UILayers } from '../../../core_tgx/easy_ui_framework/UILayers';
 import { Layout_BuildFrame } from './Layout_BuildFrame';
-import { tgxEasyController, tgxUIAlert, tgxUIController, tgxUIMgr } from '../../../core_tgx/tgx';
+import { tgxEasyController, tgxModuleContext, tgxUIAlert, tgxUIController, tgxUIMgr } from '../../../core_tgx/tgx';
 import { UI_Building } from '../ui_building/UI_Building';
-import BuildMapManager from '../../script/manager/BuildMapManager';
 import { Layout_MapGrid } from '../map/Layout_MapGrid';
-import { UI_Normal } from '../ui_normal/UI_Normal';
 import BuildGameConfig from '../../script/data/BuildGameConfig'
 import { Layout_Normal } from '../ui_normal/Layout_Normal';
 import BuildGameUtil from '../../script/BuildGameUtil';
@@ -17,11 +15,13 @@ import { BuilderComp } from '../../script/manager/BuilderComp';
 import { BuildingState } from '../../script/building/BuildingState';
 import { CharacterManager } from '../../script/manager/CharacterManager';
 import { CharacterState } from '../../script/character/CharacterState';
-import { Coordinate } from '../../../module_eliminate/scripts/game/type/DataStructure';
+import { Coordinate } from '../../../scripts/DataStructure';
+import { UI_BuildFrame, UI_Normal } from '../../../scripts/UIDef';
+import BuildMapManager from '../../script/manager/BuildMapManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('UI_Build')
-export class UI_BuildFrame extends tgxUIController {
+export class UI_BuildFrame_Impl extends UI_BuildFrame {
     constructor() {
         super('ui/ui_buildFrame/UI_BuildFrame', UILayers.POPUP1, Layout_BuildFrame)
     }
@@ -89,7 +89,7 @@ export class UI_BuildFrame extends tgxUIController {
             Layout_MapGrid.inst.node.getChildByName('grid').active = false;
 
             layout.hide();
-            
+
             let coord: Coordinate = CharacterManager.inst.player.getComponent(CharacterState).characterCoord;
 
             Layout_MapGrid.inst.onFollow(CharacterManager.inst.player.getComponent(CharacterState).role.moveTime,
@@ -108,7 +108,7 @@ export class UI_BuildFrame extends tgxUIController {
 
     onGoldChange(gold: number) {
         let self = this as unknown as Layout_Normal;
-        log(gold.toString().length)
+        // log(gold.toString().length)
         if (self.gold.children.length < gold.toString().length) {
             let len: number = self.gold.children.length;
             for (let index = 0; index < gold.toString().length - len; index++) {
@@ -174,4 +174,4 @@ export class UI_BuildFrame extends tgxUIController {
     }
 }
 
-
+tgxModuleContext.attachImplClass(UI_BuildFrame,UI_BuildFrame_Impl)

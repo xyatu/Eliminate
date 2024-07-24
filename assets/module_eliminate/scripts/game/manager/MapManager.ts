@@ -1,6 +1,6 @@
 import { _decorator, log, v2, Vec2 } from 'cc';
 import GameConfig from "../../data/GameConfig";
-import { Coordinate } from "../type/DataStructure";
+import { Coordinate } from "../../../../scripts/DataStructure";
 
 export default class MapManager {
 
@@ -54,7 +54,7 @@ export default class MapManager {
             this._posMap.push(colSet);
         }
 
-        log(this._posMap);
+        // log(this._posMap);
     }
 
 }

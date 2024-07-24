@@ -1,13 +1,13 @@
 import { _decorator, Component, log, tween, v2, v3 } from 'cc';
 import { CharacterFSM, Direction } from './CharacterFSM';
-import { Coord, Coordinate } from '../../../module_eliminate/scripts/game/type/DataStructure';
-import BuildMapManager from '../manager/BuildMapManager';
+import { Coord, Coordinate } from '../../../scripts/DataStructure';
 import BuildGameConfig from '../data/BuildGameConfig';
 import { AIController } from './NPC/AIController';
 import { CharacterState } from './CharacterState';
 import { Layout_MapGrid } from '../../ui/map/Layout_MapGrid';
 import { GameManager } from '../../../start/GameManager';
 import BuildGameUtil from '../BuildGameUtil';
+import BuildMapManager from '../manager/BuildMapManager';
 const { ccclass, property } = _decorator;
 
 

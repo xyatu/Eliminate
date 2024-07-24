@@ -1,15 +1,13 @@
 import { _decorator, AssetManager, assetManager, Component, director, instantiate, log, math, Node, profiler, Sprite, v3, Vec3 } from 'cc';
-import { tgxUIAlert, tgxUIController, tgxUIEditAlert, tgxUIMgr } from '../../../core_tgx/tgx';
+import { tgxModuleContext, tgxUIAlert, tgxUIController, tgxUIEditAlert, tgxUIMgr } from '../../../core_tgx/tgx';
 import { UILayers } from '../../../core_tgx/easy_ui_framework/UILayers';
 import { Layout_Normal } from './Layout_Normal';
-import { UI_BuildFrame } from '../ui_buildFrame/UI_BuildFrame';
 import { SceneDef } from '../../../scripts/SceneDef';
 import { ModuleDef } from '../../../scripts/ModuleDef';
-import { Coord, Coordinate } from '../../../module_eliminate/scripts/game/type/DataStructure';
+import { Coord, Coordinate } from '../../../scripts/DataStructure';
 import BuildGameConfig from '../../script/data/BuildGameConfig';
 import { Layout_BuildFrame } from '../ui_buildFrame/Layout_BuildFrame';
 import { CharacterManager } from '../../script/manager/CharacterManager';
-import BuildMapManager from '../../script/manager/BuildMapManager';
 import { CharacterState } from '../../script/character/CharacterState';
 import { GameManager } from '../../../start/GameManager';
 import { BuildGame } from '../../script/BuildGame';
@@ -17,10 +15,12 @@ import BuildGameUtil from '../../script/BuildGameUtil';
 import { SlotConfig } from '../../../start/SlotConfig';
 import { Layout_MapGrid } from '../map/Layout_MapGrid';
 import { DataGetter } from '../../../start/DataGetter';
+import { UI_BuildFrame, UI_Normal } from '../../../scripts/UIDef';
+import BuildMapManager from '../../script/manager/BuildMapManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('UI_Normal')
-export class UI_Normal extends tgxUIController {
+export class UI_Normal_Impl extends UI_Normal {
     constructor() {
         super('ui/ui_normal/UI_Normal', UILayers.HUD, Layout_Normal);
     }
@@ -125,4 +125,4 @@ export class UI_Normal extends tgxUIController {
     }
 }
 
-
+tgxModuleContext.attachImplClass(UI_Normal, UI_Normal_Impl);

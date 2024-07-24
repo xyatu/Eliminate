@@ -2,12 +2,12 @@ import { EventTouch, Label, log, Node, UITransform, v3, Vec2 } from "cc";
 import BuildGameConfig from "./data/BuildGameConfig";
 import { BuildGame } from "./BuildGame";
 import { Layout_MapGrid } from "../ui/map/Layout_MapGrid";
-import BuildMapManager from "./manager/BuildMapManager";
 import { GameManager } from "../../start/GameManager";
 import { CharacterManager } from "./manager/CharacterManager";
 import { CharacterState } from "./character/CharacterState";
-import { Coord, Coordinate } from "../../module_eliminate/scripts/game/type/DataStructure";
+import { Coord, Coordinate } from "../../scripts/DataStructure";
 import { SlotConfig } from "../../start/SlotConfig";
+import BuildMapManager from "./manager/BuildMapManager";
 
 export class Slot {
 

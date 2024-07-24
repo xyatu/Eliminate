@@ -708,6 +708,10 @@
     "_enabled": true,
     "__prefab": null,
     "gold": null,
+    "building": {
+      "__uuid__": "d058317c-3789-4a74-a5b0-135840781787",
+      "__expectedType__": "cc.Prefab"
+    },
     "_id": "7drqhf3vZFZ4is19h54sWr"
   },
   {
