@@ -29,8 +29,12 @@ export default class BuildMapManager {
     public static selectNode: Building = null;
 
     public static getPos(x: number | Coordinate, y?: number): Vec2 {
-        if (typeof x === 'number') return this._posMap[x][y];
-        else return this._posMap[x.x][x.y];
+        try {
+            if (typeof x === 'number') return this._posMap[x][y];
+            else return this._posMap[x.x][x.y];
+        } catch (error) {
+
+        }
     }
 
     public static getCoord(x: number | Vec2, y?: number): Coordinate {
@@ -53,7 +57,21 @@ export default class BuildMapManager {
         return (this.buildMapDit[type][y][x] === 0 && this.nodeMapDit[type][y][x] === null) || this.nodeMapDit[type][y][x] === building;
     }
 
-    public static place(coord: Coordinate, type: number, colShape: number[][], buildShape: number[][], node: Node) {
+    public static place(coord: Coordinate, oldCoord: Coordinate, type: number, colShape: number[][], buildShape: number[][], node: Node) {
+
+        if (oldCoord) {
+            for (let c = 0; c < buildShape.length; c++) {
+                for (let r = 0; r < buildShape[c].length; r++) {
+                    if (buildShape[c][r] !== 0) {
+                        this.buildMapDit[type][oldCoord.y + c][oldCoord.x + r] = 0;
+                        this.nodeMapDit[type][oldCoord.y + c][oldCoord.x + r] = null;
+                        this.collisionMapDit[type][oldCoord.y + c][oldCoord.x + r] = 0;
+                    }
+                }
+            }
+            let index = BuildMapManager.dataBuilding.findIndex(data => data.node === node);
+            BuildMapManager.dataBuilding.splice(index, 1);
+        }
 
         let building = new Building(node, type, node.getPosition());
 

@@ -180,6 +180,10 @@ export class Builder extends Component {
     }
 
     tryBuild(building: Node, data: Building, isLoad: boolean, coord?: Coordinate): boolean {
+        let oldCoord: Coordinate = null;
+        if (building.getComponent(BuildingState).coord) {
+            oldCoord = building.getComponent(BuildingState).coord.copy();
+        }
         let pos: Coordinate = null;
         if (coord) {
             pos = coord;
@@ -189,7 +193,7 @@ export class Builder extends Component {
         }
 
         if (this.buildCheckVoid(data, pos, building)) {
-            this.build(data, building, pos, isLoad);
+            this.build(data, building, pos, isLoad, oldCoord);
             // log(pos);
             return true;
         }
@@ -218,16 +222,17 @@ export class Builder extends Component {
         return true;
     }
 
-    build(data: Building, building: Node, coord: Coordinate, isLoad: boolean) {
+    build(data: Building, building: Node, coord: Coordinate, isLoad: boolean, oldCoord: Coordinate) {
         Layout_MapGrid.inst.node.getChildByName(data.layer.toString()).addChild(building);
 
         building.setPosition(BuildMapManager.getPos(coord).x, BuildMapManager.getPos(coord).y - BuildGameConfig.size / 2, 0);
 
-        BuildMapManager.place(coord.copy(), data.layer, data.colShape, data.buildShape, building);
+        BuildMapManager.place(coord.copy(), oldCoord, data.layer, data.colShape, data.buildShape, building);
 
-        this.changeMap(data, coord, true, isLoad);
+        this.changeMap(data, coord, true, isLoad, oldCoord);
 
         if (data.autoTile == 1) {
+            if (oldCoord) this.drawAt(data, oldCoord, data.layer, building)
             this.drawAt(data, coord, data.layer, building)
 
             building.getComponent(Sprite).spriteFrame = null;
@@ -243,6 +248,9 @@ export class Builder extends Component {
     }
 
     remove(node: Node, data: Building, coord: Coordinate) {
+        if (data.autoTile === 1) {
+            this.drawAt(data, coord, data.layer, node);
+        }
         this.changeMap(data, coord, false, false);
 
         BuildMapManager.RemoveBuildFromMap(node);
@@ -470,12 +478,16 @@ export class Builder extends Component {
         return maxLength;
     }
 
-    changeMap(data: Building, coord: Coordinate, isBuild: boolean, isLoad: boolean) {
+    changeMap(data: Building, coord: Coordinate, isBuild: boolean, isLoad: boolean, oldCoord?: Coordinate) {
 
         if (!isLoad) {
 
             if (GameManager.inst.playerState.building.findIndex(building => building.id === data.id && building.coord.compare(coord)) != -1 && isBuild) return;
 
+            if (oldCoord) {
+                let old = GameManager.inst.playerState.building.findIndex(building => building.id === data.id && building.coord.compare(oldCoord));
+                if (old != -1) GameManager.inst.playerState.building.splice(old, 1);
+            }
             GameManager.inst.changeMap(data, coord, isBuild);
 
             BuildGameUtil.saveBuilding();

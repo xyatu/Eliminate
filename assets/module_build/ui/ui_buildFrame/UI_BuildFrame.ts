@@ -88,14 +88,12 @@ export class UI_BuildFrame extends tgxUIController {
             BuildGame.inst.isBuild = false;
             Layout_MapGrid.inst.node.getChildByName('grid').active = false;
 
-
-            let coord: Coordinate = GameManager.inst.playerState.playerCoord;
-            CharacterManager.createCharacter(true, coord);
-
-            Layout_MapGrid.inst.onFollow(CharacterManager.inst.player.getComponent(CharacterState).moveTime,
-                v2(-BuildMapManager.getPos(coord).x + BuildGameConfig.size / 2, -BuildMapManager.getPos(coord).y));
-
             layout.hide();
+            
+            let coord: Coordinate = CharacterManager.inst.player.getComponent(CharacterState).characterCoord;
+
+            Layout_MapGrid.inst.onFollow(CharacterManager.inst.player.getComponent(CharacterState).role.moveTime,
+                v2(-BuildMapManager.getPos(coord).x + BuildGameConfig.size / 2, -BuildMapManager.getPos(coord).y));
         })
 
         layout.cbOnSliderChange = () => {

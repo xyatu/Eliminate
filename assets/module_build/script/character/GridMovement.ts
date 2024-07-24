@@ -64,7 +64,7 @@ export class GridMovement extends Component {
                 }))
                 .start();
 
-            Layout_MapGrid.inst.onFollow(this.node.getComponent(CharacterState).moveTime, v2(-BuildMapManager.getPos(target).x, -BuildMapManager.getPos(target).y - BuildGameConfig.size / 2));
+            Layout_MapGrid.inst.onFollow(this.node.getComponent(CharacterState).role.moveTime, v2(-BuildMapManager.getPos(target).x, -BuildMapManager.getPos(target).y - BuildGameConfig.size / 2));
         }
         else if (direction === Direction.None) {
             this.willStop = true;
