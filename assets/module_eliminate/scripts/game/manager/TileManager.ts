@@ -324,7 +324,8 @@ export default class TileManager extends Component {
         let sound: Sound = DataGetter.inst.sound.get(SoundConfig.eliminate_normal);
         tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
         for (let i = 0; i < this.combinations.length; i++) {
-            GameUtil.changeScore((this.calcScore(this.combinations[i].coords.length)) * (1 + i * 0.2));
+            GameUtil.changeScore((this.calcScore(this.combinations[i].coords.length)) * (2));
+            // GameUtil.changeScore((this.calcScore(this.combinations[i].coords.length)) * (1 + i * 0.2));
             for (let j = 0; j < this.combinations[i].coords.length; j++) {
                 this.eliminateTile(this.combinations[i].coords[j]);
             }
