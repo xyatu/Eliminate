@@ -100,8 +100,9 @@ export class AIController extends Component {
     protected update(dt: number): void {
         if (CharacterManager.inst.player && this.node.getComponent(CharacterState).characterCoord) {
             if (this.isAdjacent(CharacterManager.inst.player.getComponent(CharacterState).characterCoord, this.node.getComponent(CharacterState).characterCoord)) {
-                if (!this.node.getChildByName('Dialog').active) this.node.getChildByName('Dialog').getComponent(Sprite).spriteFrame =
-                    this.node.getComponent(CharacterState).emote[Math.ceil(math.randomRange(0, this.node.getComponent(CharacterState).emote.length))]
+                if (!this.node.getChildByName('Dialog').active)
+                    this.node.getChildByName('Dialog').getComponent(Sprite).spriteFrame =
+                        this.node.getComponent(CharacterState).emote[8];
                 this.node.getChildByName('Dialog').active = true;
             }
             else {

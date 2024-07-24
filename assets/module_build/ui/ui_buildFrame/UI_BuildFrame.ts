@@ -1,4 +1,4 @@
-import { _decorator, Component, EventMouse, EventTouch, instantiate, log, math, Node, NodeEventType, Rect, Sprite, SpriteFrame, v3 } from 'cc';
+import { _decorator, Component, EventMouse, EventTouch, instantiate, log, math, Node, NodeEventType, Rect, Sprite, SpriteFrame, v2, v3 } from 'cc';
 import { UILayers } from '../../../core_tgx/easy_ui_framework/UILayers';
 import { Layout_BuildFrame } from './Layout_BuildFrame';
 import { tgxEasyController, tgxUIAlert, tgxUIController, tgxUIMgr } from '../../../core_tgx/tgx';
@@ -15,6 +15,9 @@ import { BuildGame } from '../../script/BuildGame';
 import { GameManager } from '../../../start/GameManager';
 import { BuilderComp } from '../../script/manager/BuilderComp';
 import { BuildingState } from '../../script/building/BuildingState';
+import { CharacterManager } from '../../script/manager/CharacterManager';
+import { CharacterState } from '../../script/character/CharacterState';
+import { Coordinate } from '../../../module_eliminate/scripts/game/type/DataStructure';
 const { ccclass, property } = _decorator;
 
 @ccclass('UI_Build')
@@ -84,6 +87,14 @@ export class UI_BuildFrame extends tgxUIController {
             BuildMapManager.ClearSelectNode();
             BuildGame.inst.isBuild = false;
             Layout_MapGrid.inst.node.getChildByName('grid').active = false;
+
+
+            let coord: Coordinate = GameManager.inst.playerState.playerCoord;
+            CharacterManager.createCharacter(true, coord);
+
+            Layout_MapGrid.inst.onFollow(CharacterManager.inst.player.getComponent(CharacterState).moveTime,
+                v2(-BuildMapManager.getPos(coord).x + BuildGameConfig.size / 2, -BuildMapManager.getPos(coord).y));
+
             layout.hide();
         })
 
