@@ -92,8 +92,8 @@ const autoTileMap: { [key: number]: number[] } = {
     43: [12, 13, 42, 43],
     44: [36, 41, 42, 47],
     45: [16, 17, 46, 47],
-    46: [12, 17, 42, 47],
-    47: [12, 17, 42, 47],
+    46: [0, 1, 6, 7],
+    47: [0, 1, 6, 7],
 };
 
 const visited = new Set<string>();
@@ -151,7 +151,15 @@ export class Builder extends Component {
         building.setWorldPosition(BuildGameConfig.canvasW * view.getScaleX() / 2, BuildGameConfig.canvasH * view.getScaleY() / 2, 0);
 
         building.getComponent(BuildingState).data = data;
-        building.getComponent(Sprite).spriteFrame = data.anim.anim[0];
+        if (data.autoTile === 1) {
+            building.getChildByName('Sprite').children[0].getComponent(Sprite).spriteFrame = data.anim.anim[0];
+            building.getChildByName('Sprite').children[1].getComponent(Sprite).spriteFrame = data.anim.anim[1];
+            building.getChildByName('Sprite').children[2].getComponent(Sprite).spriteFrame = data.anim.anim[6];
+            building.getChildByName('Sprite').children[3].getComponent(Sprite).spriteFrame = data.anim.anim[7];
+        }
+        else {
+            building.getComponent(Sprite).spriteFrame = data.anim.anim[0];
+        }
         if (data.autoTile !== 1) {
             building.getComponent(UITransform).width = data.anim.anim[0].originalSize.width * 4;
             building.getComponent(UITransform).height = data.anim.anim[0].originalSize.height * 4;
@@ -221,6 +229,8 @@ export class Builder extends Component {
 
         if (data.autoTile == 1) {
             this.drawAt(data, coord, data.layer, building)
+
+            building.getComponent(Sprite).spriteFrame = null;
         } else if (data.autoTile == 2) {
             building.getChildByName('Sprite').active = false;
             this.drawFence(data, coord, data.layer, building);

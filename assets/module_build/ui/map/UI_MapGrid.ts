@@ -46,7 +46,7 @@ export class UI_MapGrid extends tgxUIController {
             layer.name = index.toString();
         }
 
-        this.node.getChildByName('grid').setSiblingIndex(this.node.children.length - 1)
+        this.node.getChildByName('grid').setSiblingIndex(this.node.children.length - 2)
 
         layout.initFinish = true;
 

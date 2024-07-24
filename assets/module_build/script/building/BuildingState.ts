@@ -49,7 +49,7 @@ export class BuildingState extends Component {
         this.move.node.active = true;
         this.putDown.node.active = true;
         this.Del.node.active = true;
-        this.node.parent = this.node.parent.parent.children[this.node.parent.parent.children.length - 5];
+        this.node.parent = this.node.parent.parent.children[this.node.parent.parent.children.length - 1];
     }
 
     unSelect() {
