@@ -88,14 +88,18 @@ export default class TileManager extends Component {
     }
 
     protected unBindTouchEvent() {
-        warn(`TileManager Un Bind Touch Event`);
-        GameEvent.off(TileEvent.TouchStart, this.onTileTouchStart, this);
-        GameEvent.off(TileEvent.TouchEnd, this.onTileTouchEnd, this);
-        GameEvent.off(TileEvent.TouchCancel, this.onTileTouchCancel, this);
-        GameEvent.off(TileEvent.TouchMove, this.onTileTouchMove, this);
-        this.tileTouchStartPos = null;
-        this.setSelectedTile(null);
-        this.unscheduleAllCallbacks();
+        try {
+            warn(`TileManager Un Bind Touch Event`);
+            GameEvent.off(TileEvent.TouchStart, this.onTileTouchStart, this);
+            GameEvent.off(TileEvent.TouchEnd, this.onTileTouchEnd, this);
+            GameEvent.off(TileEvent.TouchCancel, this.onTileTouchCancel, this);
+            GameEvent.off(TileEvent.TouchMove, this.onTileTouchMove, this);
+            this.tileTouchStartPos = null;
+            this.setSelectedTile(null);
+            this.unscheduleAllCallbacks();
+        } catch (error) {
+
+        }
     }
 
     /**
