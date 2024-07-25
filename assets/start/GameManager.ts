@@ -62,14 +62,14 @@ export class GameManager extends Component {
 
         for (let i = 0; i < this.playerState.mapRow; i++) {
             for (let j = 0; j < this.playerState.mapCol; j++) {
-                this.saveBuilding(10002, Coord(i, j));
-                if (!((i >= 10 && i <= 14 && j >= 6 && j <= 12) ||
-                    (i >= 15 && i <= 18 && j >= 6 && j <= 8) ||
-                    (i >= 12 && i <= 14 && j >= 13 && j <= 15) ||
-                    (i >= 8 && i <= 9 && j >= 7 && j <= 10) ||
-                    (i >= 5 && i <= 7 && j >= 7 && j <= 11))) {
-                    this.saveBuilding(20001, Coord(i, j));
-                }
+                // this.saveBuilding(10002, Coord(i, j));
+                // if (!((i >= 10 && i <= 14 && j >= 6 && j <= 12) ||
+                //     (i >= 15 && i <= 18 && j >= 6 && j <= 8) ||
+                //     (i >= 12 && i <= 14 && j >= 13 && j <= 15) ||
+                //     (i >= 8 && i <= 9 && j >= 7 && j <= 10) ||
+                //     (i >= 5 && i <= 7 && j >= 7 && j <= 11))) {
+                //     this.saveBuilding(20001, Coord(i, j));
+                // }
 
                 if ((i >= 5 && i <= 5 && j >= 14 && j <= 17) ||
                     (i >= 5 && i <= 9 && j >= 18 && j <= 18) ||

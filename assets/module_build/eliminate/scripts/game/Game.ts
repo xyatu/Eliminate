@@ -3,16 +3,15 @@ const { ccclass, property } = _decorator;
 
 import MapManager from "./manager/MapManager";
 import TileManager from "./manager/TileManager";
-import { tgxAudioMgr, tgxUIController, tgxUIMgr } from '../../../core_tgx/tgx';
-import { EliminateState } from './manager/EliminateState';
-import { DataGetter, Sound } from '../../../start/DataGetter';
-import { SoundConfig } from '../../../start/SoundConfig';
-import { UI_Eliminate } from '../../../scripts/UIDef';
+import { UI_Eliminate } from '../../../../scripts/UIDef';
+import { tgxAudioMgr, tgxUIMgr } from '../../../../core_tgx/tgx';
+import { DataGetter, Sound } from '../../../../start/DataGetter';
+import { SoundConfig } from '../../../../start/SoundConfig';
 
 @ccclass('Game')
 export default class Game extends Component {
     protected start() {
-        tgxUIMgr.inst.showUI(UI_Eliminate);
+        // tgxUIMgr.inst.showUI(UI_Eliminate);
         MapManager.init();
         TileManager.init();
         tgxAudioMgr.inst.stop();

@@ -11,6 +11,7 @@ import { SoundConfig } from '../../../start/SoundConfig';
 import { tgxAudioMgr } from '../../../core_tgx/tgx';
 import BuildMapManager from '../manager/BuildMapManager';
 import BuildingPool from '../../../scripts/BuildingPool';
+import { BuildGame, BuildState, GameState } from '../BuildGame';
 const { ccclass, property } = _decorator;
 
 @ccclass('buildingState')
@@ -43,7 +44,7 @@ export class BuildingState extends Component {
     @property(UITransform)
     uiTransform: UITransform = null;
 
-    isSelect: boolean = true;
+    isSelect: boolean = false;
 
     data: Building = null;
 
@@ -62,16 +63,17 @@ export class BuildingState extends Component {
     select() {
         this.bg.active = true;
         this.isSelect = true;
+        BuilderComp.inst.setSelect(this.node);
         this.move.node.active = true;
         this.putDown.node.active = true;
         this.Del.node.active = true;
         this.node.parent = Layout_MapGrid.inst.topLayer;
     }
 
-    unSelect() {
+    unSelect(isBuilder?: boolean) {
         this.bg.active = false;
         this.isSelect = false;
-        BuilderComp.inst.setSelect(null);
+        if (!isBuilder) BuilderComp.inst.setSelect(null);
         this.move.node.active = false;
         this.putDown.node.active = false;
         this.Del.node.active = false;
@@ -79,6 +81,9 @@ export class BuildingState extends Component {
             let loc: Vec2 = BuildMapManager.getPos(this.coord);
             this.node.setPosition(loc.x, loc.y - BuildGameConfig.size / 2, this.node.position.z);
             this.node.parent = Layout_MapGrid.inst.layerNode[this.data.layer];
+        }
+        else{
+            BuildingPool.put(this.node);
         }
     }
 
@@ -109,11 +114,10 @@ export class BuildingState extends Component {
     }
 
     touchEnd(event: EventTouch) {
-        if (this.origin.subtract(event.getLocation()).length() > 50 || !Builder.inst.isLoaded) return
+        if (this.origin.subtract(event.getLocation()).length() > 50 || BuildGame.GS !== GameState.build) return
         if (!this.isSelect) {
             let sound: Sound = DataGetter.inst.sound.get(SoundConfig.build_select);
             tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
-            BuilderComp.inst.setSelect(this.node);
             this.select();
         }
     }

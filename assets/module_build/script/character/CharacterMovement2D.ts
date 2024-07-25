@@ -5,6 +5,7 @@ import { GridMovement } from './GridMovement';
 import BuildGameConfig from '../data/BuildGameConfig';
 import { CharacterState } from './CharacterState';
 import { Builder } from '../manager/Builder';
+import { BuildGame, GameState } from '../BuildGame';
 const { ccclass, property } = _decorator;
 
 const tempV2 = v2();
@@ -62,7 +63,7 @@ export class CharacterMovement2D extends Component {
 
 
     update(deltaTime: number) {
-        if (Builder.isBuilding) return;
+        if (BuildGame.GS !== GameState.normal) return;
         if (this._moveFactor) {
             Vec2.multiplyScalar(tempV2, this._moveDir, this.realSpeed * deltaTime);
             // let pos = this.node.position;

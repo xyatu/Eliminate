@@ -1,5 +1,5 @@
 import { _decorator, AssetManager, assetManager, Component, director, instantiate, log, math, Node, profiler, Sprite, v3, Vec3 } from 'cc';
-import { tgxModuleContext, tgxUIAlert, tgxUIController, tgxUIEditAlert, tgxUIMgr } from '../../../core_tgx/tgx';
+import { tgxAudioMgr, tgxModuleContext, tgxUIAlert, tgxUIController, tgxUIEditAlert, tgxUIMgr } from '../../../core_tgx/tgx';
 import { UILayers } from '../../../core_tgx/easy_ui_framework/UILayers';
 import { Layout_Normal } from './Layout_Normal';
 import { SceneDef } from '../../../scripts/SceneDef';
@@ -10,12 +10,12 @@ import { Layout_BuildFrame } from '../ui_buildFrame/Layout_BuildFrame';
 import { CharacterManager } from '../../script/manager/CharacterManager';
 import { CharacterState } from '../../script/character/CharacterState';
 import { GameManager } from '../../../start/GameManager';
-import { BuildGame } from '../../script/BuildGame';
+import { BuildGame, BuildState, GameState } from '../../script/BuildGame';
 import BuildGameUtil from '../../script/BuildGameUtil';
 import { SlotConfig } from '../../../start/SlotConfig';
 import { Layout_MapGrid } from '../map/Layout_MapGrid';
 import { DataGetter } from '../../../start/DataGetter';
-import { UI_BuildFrame, UI_Normal } from '../../../scripts/UIDef';
+import { UI_BuildFrame, UI_Eliminate, UI_Normal } from '../../../scripts/UIDef';
 import BuildMapManager from '../../script/manager/BuildMapManager';
 const { ccclass, property } = _decorator;
 
@@ -40,22 +40,19 @@ export class UI_Normal_Impl extends UI_Normal {
             else {
                 tgxUIMgr.inst.showUI(UI_BuildFrame);
             }
-            // Layout_MapGrid.inst.node.getChildByName(BuildGameConfig.characterType.toString()).active = false;
             this.removeNPC();
-            this.node.active = false;
             BuildGame.inst.isBuild = true;
             Layout_MapGrid.inst.node.getChildByName('grid').active = true;
+            BuildGame.GS = GameState.build;
+            BuildGame.BS = BuildState.noSelect;
+            this.node.active = false;
         })
 
         this.onButtonEvent(layout.eliminate, () => {
             GameManager.inst.playClick();
-            assetManager.loadBundle(ModuleDef.GAME_ELIMINATE, (err, bundle: AssetManager.Bundle) => {
-                if (bundle) {
-                    director.loadScene(SceneDef.ELIMINATE_GAME, () => {
-                        tgxUIMgr.inst.hideAll();
-                    });
-                }
-            });
+            tgxUIMgr.inst.showUI(UI_Eliminate);
+            BuildGame.GS = GameState.eliminate;
+            this.node.active = false;
         })
 
         this.onButtonEvent('Create/CreatePlayer', () => {
@@ -76,7 +73,7 @@ export class UI_Normal_Impl extends UI_Normal {
 
         this.onButtonEvent('ShowSlot', () => {
             // log(localStorage.getItem(SlotConfig.slot_hasBuilding));
-            log(GameManager.inst.playerState.prosperous);
+            // log(GameManager.inst.playerState.prosperous);
         })
 
         layout.cbOnGoldChange = this.onGoldChange;

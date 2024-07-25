@@ -10,7 +10,7 @@ import { SoundConfig } from './SoundConfig';
 import BuildingPool from '../scripts/BuildingPool';
 const { ccclass, property } = _decorator;
 
-const _preloadBundles = [ModuleDef.BASIC, ModuleDef.GAME_BUILD, ModuleDef.GAME_ELIMINATE];
+const _preloadBundles = [ModuleDef.BASIC, ModuleDef.GAME_BUILD];
 
 const _preloadRes = [
     { bundle: ModuleDef.BASIC, url: 'ui_alert/UI_Alert', type: 'prefab' },

@@ -12,7 +12,7 @@ import { GameManager, PlayerState } from '../../../start/GameManager';
 import { UI_MapGrid } from '../../../scripts/UIDef';
 import BuildMapManager from '../../script/manager/BuildMapManager';
 import { Builder } from '../../script/manager/Builder';
-import { BuildGame } from '../../script/BuildGame';
+import { BuildGame, GameState } from '../../script/BuildGame';
 const { ccclass, property } = _decorator;
 
 @ccclass('Map')
@@ -42,6 +42,11 @@ export class UI_MapGrid_Impl extends UI_MapGrid {
 
         this.node.getChildByName('grid').setSiblingIndex(this.node.children.length - 2)
 
+        let land = layout.land.getComponent(UITransform);
+        let ps = GameManager.inst.playerState;
+        land.width = ps.mapCol * BuildGameConfig.size;
+        land.height = ps.mapRow * BuildGameConfig.size;
+
         layout.initFinish = true;
 
         layout.cbOnChangeScale = this.onChangeScale;
@@ -50,38 +55,65 @@ export class UI_MapGrid_Impl extends UI_MapGrid {
 
         layout.cbOnBuild = this.onBuild;
 
+        layout.cbResetMap = this.resetMap;
+
         this.node.on(NodeEventType.TOUCH_MOVE, this.touchMove, this, false);
-        this.node.on(NodeEventType.MOUSE_WHEEL, this.mouseWheel, this, false);
+        // this.node.on(NodeEventType.MOUSE_WHEEL, this.mouseWheel, this, false);
+    }
+
+    resetMap(target: Layout_MapGrid) {
+        let pos = target.grid.node.position
+        target.grid.node.setPosition(pos.x + BuildGameConfig.size / 2, pos.y + BuildGameConfig.size / 2, pos.z)
+        target.node.getComponent(UITransform).setContentSize(size(GameManager.inst.playerState.mapRow * BuildGameConfig.size, GameManager.inst.playerState.mapCol * BuildGameConfig.size));
+        target.grid.node.getComponent(UITransform).setContentSize(size(GameManager.inst.playerState.mapRow * BuildGameConfig.size, GameManager.inst.playerState.mapCol * BuildGameConfig.size));
+
+        target.grid.node.children.forEach(node => node.destroy());
+
+        for (let index = 0; index < GameManager.inst.playerState.mapRow * GameManager.inst.playerState.mapCol; index++) {
+            instantiate(target.cell).setParent(target.grid.node);
+        }
+
+        this.node.getChildByName('grid').setSiblingIndex(this.node.children.length - 2)
+
+        let land = target.land.getComponent(UITransform);
+        let landPos = target.land.position;
+        target.land.setPosition(landPos.x + BuildGameConfig.size / 2, landPos.y + BuildGameConfig.size / 2, landPos.z)
+        let ps = GameManager.inst.playerState;
+        land.width = ps.mapCol * BuildGameConfig.size;
+        land.height = ps.mapRow * BuildGameConfig.size;
     }
 
     touchMove(event: EventTouch) {
-        if (BuilderComp.inst.selectedBuilding || !Builder.inst.isLoaded) return;
+        if (BuilderComp.inst.selectedBuilding || !Builder.inst.isLoaded || BuildGame.GS !== GameState.build) return;
 
-        let touches = event.getTouches();
-        if (touches.length >= 2) {
-            let temp = v2();
-            Vec2.subtract(temp, touches[0].getLocation(), touches[1].getLocation());
-            // 双指当前间距
-            let distance = temp.length();
-            if (this.originalTouchDistance == -1) {
-                // 双指初始间距
-                this.originalTouchDistance = distance;
-                // 节点初始缩放
-                this.originalNodeScale = this.node.scale.clone();
+        BuildGameUtil.dragShow(event);
 
-            }
-            let targetScale = v3();
-            // 双指当前间距 / 双指初始间距
-            let scale = distance / this.originalTouchDistance;
-            // 节点初始缩放 * (双指当前间距 / 双指初始间距)
-            Vec3.multiplyScalar(targetScale, this.originalNodeScale, scale);
-            scale = targetScale.x;
-            // 属于节点缩放比
-            scale = clamp(scale, BuildGameConfig.mapMinScale, BuildGameConfig.mapMaxScale);
-            this.node.setScale(scale, scale, scale);
-        } else if (event.getTouches().length === 1) {
-            BuildGameUtil.dragShow(event);
-        }
+        // let touches = event.getTouches();
+        // if (touches.length >= 2) {
+        //     let temp = v2();
+        //     Vec2.subtract(temp, touches[0].getLocation(), touches[1].getLocation());
+        //     // 双指当前间距
+        //     let distance = temp.length();
+        //     if (this.originalTouchDistance == -1) {
+        //         // 双指初始间距
+        //         this.originalTouchDistance = distance;
+        //         // 节点初始缩放
+        //         this.originalNodeScale = this.node.scale.clone();
+
+        //     }
+        //     let targetScale = v3();
+        //     // 双指当前间距 / 双指初始间距
+        //     let scale = distance / this.originalTouchDistance;
+        //     // 节点初始缩放 * (双指当前间距 / 双指初始间距)
+        //     Vec3.multiplyScalar(targetScale, this.originalNodeScale, scale);
+        //     scale = targetScale.x;
+        //     // 属于节点缩放比
+        //     scale = clamp(scale, BuildGameConfig.mapMinScale, BuildGameConfig.mapMaxScale);
+        //     this.node.setScale(scale, scale, scale);
+        // }
+        //  else if (event.getTouches().length === 1) {
+        //     BuildGameUtil.dragShow(event);
+        // }
     }
 
     mouseWheel(event: EventMouse) {

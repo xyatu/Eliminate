@@ -6,7 +6,7 @@ import { tgxUIAlert, tgxUIEditAlert } from "../../../core_tgx/tgx";
 import { BuildingState } from "../../script/building/BuildingState";
 import { Building, DataGetter } from "../../../start/DataGetter";
 import { Layout_MapGrid } from "../../ui/map/Layout_MapGrid";
-import { GameManager } from "../../../start/GameManager";
+import { GameManager, SaveBuilding } from "../../../start/GameManager";
 import { BuilderComp } from "./BuilderComp";
 import BuildMapManager from "./BuildMapManager";
 import BuildingPool from "../../../scripts/BuildingPool";
@@ -112,6 +112,8 @@ export class Builder extends Component {
 
     canvas: UITransform = null;
 
+    isLoadedBuilding: Map<Coordinate, number> = new Map();
+
     getCanvas(): UITransform {
         if (!this.canvas) {
             this.canvas = find('Canvas').getComponent(UITransform);
@@ -127,56 +129,95 @@ export class Builder extends Component {
     }
 
     loadMap() {
-        if (BuildGameConfig.currentIndex >= GameManager.inst.playerState.building.length) {
-            console.timeEnd(`loadMap`);
-            BuildGameUtil.saveBuilding(); // 全部加载完毕后保存
+        // console.time('loadMap');
+        let buildings: SaveBuilding[] = GameManager.inst.playerState.building;
 
-            let coord: Coordinate = GameManager.inst.playerState.playerCoord;
-            if (!coord) {
-                coord = new Coordinate(Math.floor(GameManager.inst.playerState.mapCol / 2), Math.floor(GameManager.inst.playerState.mapRow / 2));
-            }
-            CharacterManager.createCharacter(true, coord);
+        // 初始加载当前视角内的建筑物
+        this.loadVisibleBuildings(buildings);
 
-            Layout_MapGrid.inst.onFollow(0.01, v2(-BuildMapManager.getPos(coord).x + BuildGameConfig.size / 2, -BuildMapManager.getPos(coord).y));
-            Builder.inst.isLoaded = true;
-            Layout_Normal.inst.node.active = true;
+        // 异步加载其余建筑物
+        this.LoadRemainingBuildings(buildings);
+    }
 
-            tween(Layout_MapGrid.inst.node)
-                .to(0.5, { scale: v3(1, 1, 1) })
-                .start();
-            return;
-        }
+    loadVisibleBuildings(buildings: SaveBuilding[]) {
+        // 假设有一个方法能计算出当前视角内的建筑物
+        let visibleBuildings: SaveBuilding[] = this.getVisibleBuildings(buildings);
 
-        log(GameManager.inst.playerState.playerCoord)
-
-        const endIndex = Math.min(BuildGameConfig.currentIndex + BuildGameConfig.batchSize, GameManager.inst.playerState.building.length);
-        for (let i = BuildGameConfig.currentIndex; i < endIndex; i++) {
-            let building = GameManager.inst.playerState.building[i];
+        visibleBuildings.forEach(building => {
             let data: Building = DataGetter.inst.buildingdata.get(building.id);
-            let node: Node = Builder.inst.createBuilding(data);
+            let node: Node = this.createBuilding(data, true);
             let bs: BuildingState = node.getComponent(BuildingState);
-            Builder.inst.tryBuild(node, data, true, bs, building.coord);
+            this.tryBuild(node, data, true, bs, building.coord);
             bs.unSelect();
-        }
+            this.isLoadedBuilding.set(building.coord, building.id);
+        });
 
-        BuildGameConfig.currentIndex = endIndex;
-        requestAnimationFrame(() => Builder.inst.loadMap());
+        BuildGameUtil.saveBuilding(); // 全部加载完毕后保存
+        Builder.inst.isLoaded = true;
+        Layout_Normal.inst.node.active = true;
+    }
+
+    getVisibleBuildings(buildings: SaveBuilding[]): SaveBuilding[] {
+        let psCoord = GameManager.inst.playerState.playerCoord;
+        let minCoord = Coord(psCoord.x - 8, psCoord.y - 10);
+        let maxCoord = Coord(psCoord.x + 4, psCoord.y + 10);
+        return buildings.filter(building => {
+            return (building.coord.x >= minCoord.x && building.coord.x <= maxCoord.x &&
+                building.coord.y >= minCoord.y && building.coord.y <= maxCoord.y);
+        })
+    }
+
+    async LoadRemainingBuildings(buildings: SaveBuilding[]) {
+        // 异步加载其他建筑物
+        setTimeout(() => {
+            let remainingBuildings = buildings.filter(building => !this.isBuildingLoaded(building));
+
+            remainingBuildings.forEach(building => {
+                let data: Building = DataGetter.inst.buildingdata.get(building.id);
+                let node: Node = this.createBuilding(data, true);
+                let bs: BuildingState = node.getComponent(BuildingState);
+                this.tryBuild(node, data, true, bs, building.coord);
+                bs.unSelect();
+                this.isLoadedBuilding.set(building.coord, building.id);
+            });
+        }, 0);
+    }
+
+    isBuildingLoaded(building: SaveBuilding): boolean {
+        return this.isLoadedBuilding.has(building.coord);
     }
 
     adsorption(building: Node) {
         let coord: Coordinate = BuildMapManager.getCoord(building.position.x, building.position.y + BuildGameConfig.size / 2);
+        if (!coord) coord = new Coordinate();
         let pos: Vec3 = building.position;
-        if (pos.x > BuildMapManager.getPos(GameManager.inst.playerState.mapCol - 1, GameManager.inst.playerState.mapRow - 1).x) {
-            coord = BuildMapManager.getCoord(BuildMapManager.getPos(GameManager.inst.playerState.mapCol - 1, GameManager.inst.playerState.mapRow - 1).x, building.position.y + BuildGameConfig.size / 2);
+        if (pos.x > BuildMapManager.getPos(GameManager.inst.playerState.mapCol - 1, GameManager.inst.playerState.mapRow - 1).x &&
+            pos.y > BuildMapManager.getPos(GameManager.inst.playerState.mapCol - 1, GameManager.inst.playerState.mapRow - 1).y) {
+            coord = BuildMapManager.getCoord(
+                BuildMapManager.getPos(GameManager.inst.playerState.mapCol - 1, GameManager.inst.playerState.mapRow - 1).x,
+                BuildMapManager.getPos(GameManager.inst.playerState.mapCol - 1, GameManager.inst.playerState.mapRow - 1).y + BuildGameConfig.size / 2);
         }
-        if (pos.y > BuildMapManager.getPos(GameManager.inst.playerState.mapCol - 1, GameManager.inst.playerState.mapRow - 1).y) {
-            coord = BuildMapManager.getCoord(building.position.x, BuildMapManager.getPos(GameManager.inst.playerState.mapCol - 1, GameManager.inst.playerState.mapRow - 1).y + BuildGameConfig.size / 2);
+        else {
+            if (pos.x > BuildMapManager.getPos(GameManager.inst.playerState.mapCol - 1, GameManager.inst.playerState.mapRow - 1).x) {
+                coord = BuildMapManager.getCoord(BuildMapManager.getPos(GameManager.inst.playerState.mapCol - 1, GameManager.inst.playerState.mapRow - 1).x, building.position.y + BuildGameConfig.size / 2);
+            }
+            if (pos.y > BuildMapManager.getPos(GameManager.inst.playerState.mapCol - 1, GameManager.inst.playerState.mapRow - 1).y) {
+                coord = BuildMapManager.getCoord(building.position.x, BuildMapManager.getPos(GameManager.inst.playerState.mapCol - 1, GameManager.inst.playerState.mapRow - 1).y + BuildGameConfig.size / 2);
+            }
         }
-        if (pos.x < BuildMapManager.getPos(0, 0).x) {
-            coord = BuildMapManager.getCoord(BuildMapManager.getPos(0, 0).x, building.position.y + BuildGameConfig.size / 2);
+        if (pos.x < BuildMapManager.getPos(0, 0).x &&
+            pos.y < BuildMapManager.getPos(0, 0).y) {
+            coord = BuildMapManager.getCoord(
+                BuildMapManager.getPos(0, 0).x,
+                BuildMapManager.getPos(0, 0).y + BuildGameConfig.size / 2);
         }
-        if (pos.y < BuildMapManager.getPos(0, 0).y) {
-            coord = BuildMapManager.getCoord(building.position.x, BuildMapManager.getPos(0, 0).y + BuildGameConfig.size / 2);
+        else {
+            if (pos.x < BuildMapManager.getPos(0, 0).x) {
+                coord = BuildMapManager.getCoord(BuildMapManager.getPos(0, 0).x, building.position.y + BuildGameConfig.size / 2);
+            }
+            if (pos.y < BuildMapManager.getPos(0, 0).y) {
+                coord = BuildMapManager.getCoord(building.position.x, BuildMapManager.getPos(0, 0).y + BuildGameConfig.size / 2);
+            }
         }
         building.setPosition(BuildMapManager.getPos(coord).x, BuildMapManager.getPos(coord).y - BuildGameConfig.size / 2, 0);
     }
@@ -186,7 +227,7 @@ export class Builder extends Component {
         return this.buildCheckVoid(data, coord, this.node);
     }
 
-    createBuilding(data: Building): Node {
+    createBuilding(data: Building, isLoad: boolean): Node {
         let building: Node = BuildingPool.get() || instantiate(BuilderComp.inst.building);
 
         Layout_MapGrid.inst.node.addChild(building);
@@ -212,7 +253,9 @@ export class Builder extends Component {
         }
 
         building.setWorldPosition(this.getCanvas().contentSize.width / 2 - bs.uiTransform.contentSize.width / 2, this.getCanvas().contentSize.height / 2, building.position.z);
-        BuilderComp.inst.setSelect(building);
+        if (!isLoad) {
+            building.getComponent(BuildingState).select();
+        }
 
         return building;
     }

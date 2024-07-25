@@ -117,7 +117,7 @@ export default class BuildMapManager {
             }
         }
 
-        
+
         BuildingPool.put(building);
     }
 
@@ -186,8 +186,8 @@ export default class BuildMapManager {
     /**
      * 初始化
      */
-    public static init() {
-        this.generatePosMap();
+    public static init(isReset?: boolean) {
+        this.generatePosMap(isReset);
         this.generateDataMapDit();
         this.generateNodeMapDit();
         this.generateColMapDit();
@@ -197,14 +197,16 @@ export default class BuildMapManager {
     /**
      * 生成位置表
      */
-    private static generatePosMap() {
+    private static generatePosMap(isReset?: boolean) {
         this._posMap = [];
         // 计算宽高
         this.width = (BuildGameConfig.padding * 2) + (BuildGameConfig.size * GameManager.inst.playerState.mapCol) + (BuildGameConfig.spacing * (GameManager.inst.playerState.mapCol - 1));
         this.height = (BuildGameConfig.padding * 2) + (BuildGameConfig.size * GameManager.inst.playerState.mapRow) + (BuildGameConfig.spacing * (GameManager.inst.playerState.mapRow - 1));
         // 以左下角为原点，计算第一个方块的位置
-        this.beginX = -(this.width / 2) + BuildGameConfig.padding + (BuildGameConfig.size / 2) - BuildGameConfig.size / 2;
-        this.beginY = -(this.height / 2) + BuildGameConfig.padding + (BuildGameConfig.size / 2);
+        if (!isReset) {
+            this.beginX = -(this.width / 2) + BuildGameConfig.padding + (BuildGameConfig.size / 2) - BuildGameConfig.size / 2;
+            this.beginY = -(this.height / 2) + BuildGameConfig.padding + (BuildGameConfig.size / 2);
+        }
         // 计算所有方块的位置
         // 从左到右计算每一列方块的位置
         for (let c = 0; c < GameManager.inst.playerState.mapCol; c++) {

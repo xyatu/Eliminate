@@ -24,6 +24,9 @@ export class Layout_MapGrid extends Component {
     @property(Node)
     topLayer: Node = null;
 
+    @property(Node)
+    land: Node = null;
+
     initFinish: boolean = false;
 
     public static inst: Layout_MapGrid = null;
@@ -35,6 +38,8 @@ export class Layout_MapGrid extends Component {
     public cbOnFollow: Function;
 
     public cbOnBuild: Function;
+
+    public cbResetMap: Function;
 
     touchStartDis: number = 0;
 
@@ -62,11 +67,12 @@ export class Layout_MapGrid extends Component {
         }
     }
 
-    private onBuild() {
-        if (this.cbOnBuild && this.buildUI) {
-            this.cbOnBuild(this.buildUI);
+    public resetMap() {
+        if (this.cbResetMap) {
+            this.cbResetMap(this);
         }
     }
+
     protected start(): void {
         this.node.setPosition(0, 0, 0);
     }

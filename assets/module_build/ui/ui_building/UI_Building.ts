@@ -8,7 +8,7 @@ import { tgxAudioMgr, tgxUIAlert } from '../../../core_tgx/tgx';
 import { GameManager } from '../../../start/GameManager';
 import BuildGameUtil from '../../script/BuildGameUtil';
 import { Builder } from '../../script/manager/Builder';
-import { BuildGame } from '../../script/BuildGame';
+import { BuildGame, BuildState } from '../../script/BuildGame';
 import { SoundConfig } from '../../../start/SoundConfig';
 const { ccclass, property } = _decorator;
 
@@ -46,7 +46,9 @@ export class UI_Building extends Component {
             return;
         }
 
-        Builder.inst.createBuilding(this.building_data);
+        if (BuildGame.BS !== BuildState.notBuild) {
+            Builder.inst.createBuilding(this.building_data, false);
+        }
     }
 
     setLock(isLock: boolean) {

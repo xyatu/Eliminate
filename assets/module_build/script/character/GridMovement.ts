@@ -8,6 +8,7 @@ import { Layout_MapGrid } from '../../ui/map/Layout_MapGrid';
 import { GameManager } from '../../../start/GameManager';
 import BuildGameUtil from '../BuildGameUtil';
 import BuildMapManager from '../manager/BuildMapManager';
+import { Builder } from '../manager/Builder';
 const { ccclass, property } = _decorator;
 
 

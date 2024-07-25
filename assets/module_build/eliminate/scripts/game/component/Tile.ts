@@ -1,16 +1,16 @@
 import { _decorator, Component, Sprite, Event, tween, v3, NodeEventType, EventTouch, log, Vec3, UITransform, warn, Tween, math } from 'cc';
 const { ccclass, property } = _decorator;
 
-import { TileType, TileEvent } from "../../../../scripts/Enum";
-import { Coordinate, Coord } from "../../../../scripts/DataStructure";
 import ResManager from "../manager/ResManager";
 import PoolManager from "../manager/PoolManager";
 import { GameEvent } from '../../../eazax-ccc/core/GameEvent';
 import TileManager from '../manager/TileManager';
 import { EliminateState } from '../manager/EliminateState';
-import { DataGetter, Sound } from '../../../../start/DataGetter';
-import { SoundConfig } from '../../../../start/SoundConfig';
-import { tgxAudioMgr } from '../../../../core_tgx/tgx';
+import { TileEvent, TileType } from '../../../../../scripts/Enum';
+import { Coord, Coordinate } from '../../../../../scripts/DataStructure';
+import { DataGetter, Sound } from '../../../../../start/DataGetter';
+import { SoundConfig } from '../../../../../start/SoundConfig';
+import { tgxAudioMgr } from '../../../../../core_tgx/tgx';
 
 @ccclass('Tile')
 export default class Tile extends Component {

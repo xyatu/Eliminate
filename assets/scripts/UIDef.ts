@@ -7,12 +7,12 @@ export class UI_AboutMe extends tgxUIController { }
 tgxModuleContext.attachModule(UI_AboutMe, ModuleDef.EXTRA);
 
 export class UI_Eliminate extends tgxUIController { }
-tgxModuleContext.attachModule(UI_Eliminate, ModuleDef.GAME_ELIMINATE);
+tgxModuleContext.attachModule(UI_Eliminate, ModuleDef.GAME_BUILD);
 
 export class UI_OverComp extends tgxUIController {
     initUI(gold: number) { }
 }
-tgxModuleContext.attachModule(UI_OverComp, ModuleDef.GAME_ELIMINATE);
+tgxModuleContext.attachModule(UI_OverComp, ModuleDef.GAME_BUILD);
 
 export class UI_MapGrid extends tgxUIController { }
 tgxModuleContext.attachModule(UI_MapGrid, ModuleDef.GAME_BUILD);

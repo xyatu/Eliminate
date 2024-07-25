@@ -1,6 +1,6 @@
 import { _decorator, log, v2, Vec2 } from 'cc';
 import GameConfig from "../../data/GameConfig";
-import { Coordinate } from "../../../../scripts/DataStructure";
+import { Coordinate } from '../../../../../scripts/DataStructure';
 
 export default class MapManager {
 

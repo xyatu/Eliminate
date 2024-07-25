@@ -1,5 +1,5 @@
 import { _decorator } from 'cc';
-import { TileType } from "../../../scripts/Enum";
+import { TileType } from '../../../../scripts/Enum';
 
 export default class GameConfig {
     public static row: number = 11; // 行数

@@ -1,7 +1,6 @@
 import { _decorator, Component, SpriteFrame } from 'cc';
+import { TileType } from '../../../../../scripts/Enum';
 const { ccclass, property } = _decorator;
-
-import { TileType } from "../../../../scripts/Enum";
 
 @ccclass('ResManager')
 export default class ResManager extends Component {

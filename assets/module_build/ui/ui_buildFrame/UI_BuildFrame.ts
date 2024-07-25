@@ -9,7 +9,7 @@ import { Layout_Normal } from '../ui_normal/Layout_Normal';
 import BuildGameUtil from '../../script/BuildGameUtil';
 import { DataGetter } from '../../../start/DataGetter';
 import { Builder } from '../../script/manager/Builder';
-import { BuildGame } from '../../script/BuildGame';
+import { BuildGame, GameState } from '../../script/BuildGame';
 import { GameManager } from '../../../start/GameManager';
 import { BuilderComp } from '../../script/manager/BuilderComp';
 import { BuildingState } from '../../script/building/BuildingState';
@@ -94,6 +94,8 @@ export class UI_BuildFrame_Impl extends UI_BuildFrame {
 
             Layout_MapGrid.inst.onFollow(CharacterManager.inst.player.getComponent(CharacterState).role.moveTime,
                 v2(-BuildMapManager.getPos(coord).x + BuildGameConfig.size / 2, -BuildMapManager.getPos(coord).y));
+
+            BuildGame.GS = GameState.normal;
         })
 
         layout.cbOnSliderChange = () => {
@@ -174,4 +176,4 @@ export class UI_BuildFrame_Impl extends UI_BuildFrame {
     }
 }
 
-tgxModuleContext.attachImplClass(UI_BuildFrame,UI_BuildFrame_Impl)
+tgxModuleContext.attachImplClass(UI_BuildFrame, UI_BuildFrame_Impl)

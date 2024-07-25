@@ -2,19 +2,19 @@ import { _decorator, Component, Node, Vec2, v3, tween, v2, log, warn, error, ran
 const { ccclass, property } = _decorator;
 
 import Tile from "../component/Tile";
-import { TileType, TileEvent, SlideDirection } from "../../../../scripts/Enum";
 import GameConfig from "../../data/GameConfig";
 import GameUtil from "../util/GameUtil";
 import PoolManager from "./PoolManager";
 import MapManager from "./MapManager";
-import { Coordinate, Combination, Coord } from "../../../../scripts/DataStructure";
 import { GameEvent } from "../../../eazax-ccc/core/GameEvent";
 import ResManager from './ResManager';
 import { EliminateState } from './EliminateState';
-import { GameManager } from '../../../../start/GameManager';
-import { DataGetter, Sound } from '../../../../start/DataGetter';
-import { tgxAudioMgr } from '../../../../core_tgx/tgx';
-import { SoundConfig } from '../../../../start/SoundConfig';
+import { SlideDirection, TileEvent, TileType } from '../../../../../scripts/Enum';
+import { Combination, Coord, Coordinate } from '../../../../../scripts/DataStructure';
+import { GameManager } from '../../../../../start/GameManager';
+import { DataGetter, Sound } from '../../../../../start/DataGetter';
+import { SoundConfig } from '../../../../../start/SoundConfig';
+import { tgxAudioMgr } from '../../../../../core_tgx/tgx';
 
 @ccclass('TileManager')
 export default class TileManager extends Component {
@@ -108,7 +108,7 @@ export default class TileManager extends Component {
      */
     private onTileTouchStart(coord: Coordinate, pos: Vec2) {
         GameManager.inst.playClick();
-        log('点击 | coord: ' + coord.toString() + ' | type: ' + this.getType(coord));
+        // log('点击 | coord: ' + coord.toString() + ' | type: ' + this.getType(coord));
         // 是否已经选中了方块
         if (!this.selectedCoord) {
             this.tileTouchStartPos = pos;
@@ -185,8 +185,22 @@ export default class TileManager extends Component {
 
     private autoFall() {
         let c = Math.floor(math.randomRange(0, GameConfig.col));
-        if (this.getType(new Coordinate(c, GameConfig.row - 1)) && this.getType(new Coordinate(c, GameConfig.row - 1)) != TileType.Z) {
-            EliminateState.onGameOverEvent();
+        if (this.getType(new Coordinate(c, GameConfig.row - 1))) {
+            if (this.getType(new Coordinate(c, GameConfig.row - 1)) != TileType.Z) {
+                EliminateState.onGameOverEvent();
+            }
+            else {
+                if (this.getType(new Coordinate(c, GameConfig.row - 2))) {
+                    EliminateState.onGameOverEvent();
+                }
+                else {
+                    let type = GameUtil.getRandomType();
+                    let tile = this.getNewTile(c, GameConfig.row - 2, type);
+                    this.setTile(c, GameConfig.row - 2, tile)
+                    this.setType(c, GameConfig.row - 2, type);
+                    this.falldown();
+                }
+            }
         }
         else {
             let type = GameUtil.getRandomType();
@@ -327,8 +341,8 @@ export default class TileManager extends Component {
      * 消除组合
      */
     private eliminateCombinations() {
-        let sound: Sound = DataGetter.inst.sound.get(SoundConfig.eliminate_normal);
-        tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
+        // let sound: Sound = DataGetter.inst.sound.get(SoundConfig.eliminate_normal);
+        // tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
         for (let i = 0; i < this.combinations.length; i++) {
             GameUtil.changeScore((this.calcScore(this.combinations[i].coords.length)) * (2 + i));
             // GameUtil.changeScore((this.calcScore(this.combinations[i].coords.length)) * (1 + i * 0.2));

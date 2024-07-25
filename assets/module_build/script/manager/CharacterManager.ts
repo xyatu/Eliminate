@@ -41,7 +41,6 @@ export class CharacterManager extends Component {
             return;
         }
         if (this.inst.cbOnCreateCharacter) {
-            console.log(coord.toString());
             this.inst.cbOnCreateCharacter(isPlayer, coord);
         }
     }

@@ -1,4 +1,4 @@
-import { EventTouch, Label, log, Node, UITransform, v3, Vec2 } from "cc";
+import { EventTouch, Label, log, Node, UITransform, v3, Vec2, view } from "cc";
 import BuildGameConfig from "./data/BuildGameConfig";
 import { BuildGame } from "./BuildGame";
 import { Layout_MapGrid } from "../ui/map/Layout_MapGrid";
@@ -42,6 +42,17 @@ export default class BuildGameUtil {
     public static pointIsInsideTargetArea(point: Vec2, targetCellPos: Vec2): boolean {
         return point.x >= targetCellPos.x - BuildGameConfig.size / 2 && point.x <= targetCellPos.x + BuildGameConfig.size / 2 &&
             point.y >= targetCellPos.y - BuildGameConfig.size / 2 && point.y <= targetCellPos.y + BuildGameConfig.size / 2
+    }
+
+    public static coordIsInsideScreen(coord: Coordinate): boolean {
+        let pos = BuildMapManager.getPos(coord);
+        const visibleSize = view.getVisibleSize();
+        const screenWidth = visibleSize.width;
+        const screenHeight = visibleSize.height;
+
+        // 检查点是否在屏幕范围内
+        return pos.x >= 0 && pos.x <= screenWidth && pos.y >= 0 && pos.y <= screenHeight;
+
     }
 
     public static getAllChildren(node: Node): Node[] {

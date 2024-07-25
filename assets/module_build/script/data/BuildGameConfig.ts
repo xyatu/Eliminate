@@ -28,8 +28,8 @@ export default class BuildGameConfig_Impl extends BuildGameConfig {
 
     public static initialRow: number = 0;
 
-    public static mapMinScale: number = 0.5;
-    public static mapMaxScale: number = 2;
+    public static mapMinScale: number = 0.8;
+    public static mapMaxScale: number = 1.2;
 
     public static scaleVal: number = 0.02;
 

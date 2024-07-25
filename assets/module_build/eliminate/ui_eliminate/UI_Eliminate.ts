@@ -1,23 +1,19 @@
 import { _decorator, AssetManager, assetManager, Component, director, game, Game, instantiate, Layout, log, Node, Sprite } from 'cc';
-import { tgxAudioMgr, tgxModuleContext, tgxUIAlert, tgxUIController, tgxUIMgr } from '../../core_tgx/tgx';
-import { GameUILayers } from '../../scripts/GameUILayers';
-import { Layout_Eliminate } from './Layout_Eliminate';
-import { ModuleDef } from '../../scripts/ModuleDef';
-import { SceneDef } from '../../scripts/SceneDef';
-import { DataGetter, Sound } from '../../start/DataGetter';
-import { SoundConfig } from '../../start/SoundConfig';
-import { GameManager } from '../../start/GameManager';
 import { EliminateState } from '../scripts/game/manager/EliminateState';
-import { UI_Eliminate } from '../../scripts/UIDef';
+import { UI_Eliminate } from '../../../scripts/UIDef';
+import { ModuleDef } from '../../../scripts/ModuleDef';
+import { GameUILayers } from '../../../scripts/GameUILayers';
+import { Layout_Eliminate } from './Layout_Eliminate';
+import { DataGetter } from '../../../start/DataGetter';
+import { GameManager } from '../../../start/GameManager';
+import { tgxModuleContext, tgxUIAlert } from '../../../core_tgx/tgx';
 const { ccclass, property } = _decorator;
-
-const BundleName = ModuleDef.GAME_ELIMINATE;
 
 @ccclass('UI_Eliminate')
 export class UI_Eliminate_Impl extends UI_Eliminate {
 
     constructor() {
-        super('ui_eliminate/UI_Eliminate', GameUILayers.HUD, Layout_Eliminate);
+        super('eliminate/ui_eliminate/UI_Eliminate', GameUILayers.GAME, Layout_Eliminate);
     }
 
     public getRes(): [] {
@@ -53,6 +49,10 @@ export class UI_Eliminate_Impl extends UI_Eliminate {
                     EliminateState.onGameOverEvent();
                 }
             })
+        })
+
+        EliminateState.inst.cbGameOverEvent.push(() => {
+            this.hide();
         })
 
         layout.onChangeScoreEvent(0);

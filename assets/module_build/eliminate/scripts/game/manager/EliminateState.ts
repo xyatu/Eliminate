@@ -1,12 +1,11 @@
 import { _decorator, Component, director, instantiate, log, Node, Prefab, view } from 'cc';
 import GameUtil from '../util/GameUtil';
-import { tgxAudioMgr, tgxUIAlert, tgxUIController, tgxUIMgr, tgxUIWaiting } from '../../../../core_tgx/tgx';
-import { SceneDef } from '../../../../scripts/SceneDef';
-import { GameManager } from '../../../../start/GameManager';
-import { SlotConfig } from '../../../../start/SlotConfig';
-import { DataGetter, Sound } from '../../../../start/DataGetter';
-import { SoundConfig } from '../../../../start/SoundConfig';
-import { UI_OverComp } from '../../../../scripts/UIDef';
+import { GameManager } from '../../../../../start/GameManager';
+import { UI_OverComp } from '../../../../../scripts/UIDef';
+import { tgxAudioMgr, tgxUIMgr } from '../../../../../core_tgx/tgx';
+import { DataGetter, Sound } from '../../../../../start/DataGetter';
+import { SoundConfig } from '../../../../../start/SoundConfig';
+import { SlotConfig } from '../../../../../start/SlotConfig';
 const { ccclass, property } = _decorator;
 
 @ccclass('EliminateState')
