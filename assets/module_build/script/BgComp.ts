@@ -7,7 +7,7 @@ import { SceneDef } from '../../scripts/SceneDef';
 import { Builder } from './manager/Builder';
 import { BuildGame, BuildState, GameState } from './BuildGame';
 import BuildMapManager from './manager/BuildMapManager';
-import { UI_MapGrid } from '../../scripts/UIDef';
+import { BuildGameConfig, UI_MapGrid } from '../../scripts/UIDef';
 import { Layout_MapGrid } from '../ui/map/Layout_MapGrid';
 const { ccclass, property } = _decorator;
 
@@ -19,8 +19,7 @@ export class BgComp extends Component {
         let ps: PlayerState = GameManager.inst.playerState;
 
         let row: number = ps.mapRow;
-        let col: number = ps.mapCol;
-        let gold: number = (row + col + 1) * 1500;
+        let gold: number = 15000 + (row - 22) * 5000;
 
         let str: string = `要花费${gold}金币购买一层地块吗？`
 
@@ -30,19 +29,13 @@ export class BgComp extends Component {
                     tgxUIAlert.show(`金币不足`);
                     return;
                 }
-                GameManager.inst.onGoldChange(-gold);
+                BuildGame.inst.changeGold(-gold);
                 GameManager.inst.onRowChange(1);
                 GameManager.inst.onColChange(1);
                 BuildGameUtil.saveMap();
                 BuildGameUtil.saveGold();
-
-                tgxUIAlert.show(`刷新地图`).onClick(isOK => {
-                    let bundle = assetManager.getBundle(ModuleDef.GAME_BUILD);
-                    bundle.preloadScene(SceneDef.BUILD_GAME, () => {
-                        BuildMapManager.init(true);
-                        Layout_MapGrid.inst.resetMap();
-                    });
-                })
+                BuildMapManager.init(true);
+                Layout_MapGrid.inst.resetMap();
 
             }
         })

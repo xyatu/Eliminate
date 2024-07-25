@@ -124,8 +124,8 @@ export class UI_BuildFrame_Impl extends UI_BuildFrame {
             }
         }
 
-        for (let index = 0; index < self.gold.children.length; index++) {
-            self.gold.children[index].getComponent(Sprite).spriteFrame = DataGetter.inst.numSprite.jsNum[parseInt(gold.toString()[self.gold.children.length - 1 - index])];
+        for (let index = 0; index < gold.toString().length; index++) {
+            self.gold.children[index].getComponent(Sprite).spriteFrame = DataGetter.inst.numSprite.jsNum[parseInt(gold.toString()[gold.toString().length - 1 - index])];
         }
     }
 
