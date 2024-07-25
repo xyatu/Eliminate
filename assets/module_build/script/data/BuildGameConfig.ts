@@ -42,8 +42,10 @@ export default class BuildGameConfig_Impl extends BuildGameConfig {
 
     public static buttomRole: number = 4;
 
-    public static batchSize: number = 5;
+    public static batchSize: number = 50;
     public static currentIndex: number = 0;
+
+    public static num: number = 0;
 }
 
 tgxModuleContext.attachImplClass(BuildGameConfig, BuildGameConfig_Impl);

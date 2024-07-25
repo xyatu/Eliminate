@@ -2894,6 +2894,24 @@
     "bg": {
       "__id__": 32
     },
+    "autoTile0": {
+      "__id__": 6
+    },
+    "autoTile1": {
+      "__id__": 12
+    },
+    "autoTile2": {
+      "__id__": 18
+    },
+    "autoTile3": {
+      "__id__": 24
+    },
+    "buildingSprite": {
+      "__id__": 128
+    },
+    "uiTransform": {
+      "__id__": 126
+    },
     "_id": ""
   },
   {

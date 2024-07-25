@@ -18,7 +18,7 @@ export class PlayerState {
     building: SaveBuilding[] = [];
 }
 
-class SaveBuilding {
+export class SaveBuilding {
     id: number = 0;
     coord: Coordinate = null;
 
@@ -53,6 +53,8 @@ export class GameManager extends Component {
         this.loadPSCoordSlot();
         this.loadHasBuilding();
         this.loadGold();
+
+        this.ps.building = this.mergeSort(this.ps.building);
     }
 
     initMap() {
@@ -91,6 +93,7 @@ export class GameManager extends Component {
         this.saveBuilding(62301, Coord(10, 3));
         this.saveBuilding(62301, Coord(11, 1));
         this.saveBuilding(62301, Coord(13, 3));
+
     }
 
     loadMap() {
@@ -123,7 +126,6 @@ export class GameManager extends Component {
 
     loadPSCoordSlot() {
         let coordStr: string = localStorage.getItem(SlotConfig.slot_psCoord);
-        console.log(coordStr)
         if (coordStr) {
             let info: string[] = coordStr.split(',');
             this.playerState.playerCoord = Coord(parseInt(info[0]), parseInt(info[1]))
@@ -209,4 +211,34 @@ export class GameManager extends Component {
         let sound: Sound = DataGetter.inst.sound.get(SoundConfig.click);
         tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
     }
+
+    mergeSort(buildings: SaveBuilding[]): SaveBuilding[] {
+        if (buildings.length <= 1) {
+            return buildings;
+        }
+    
+        const mid = Math.floor(buildings.length / 2);
+        const left = this.mergeSort(buildings.slice(0, mid));
+        const right = this.mergeSort(buildings.slice(mid));
+    
+        return this.merge(left, right);
+    }
+    
+    merge(left: SaveBuilding[], right: SaveBuilding[]): SaveBuilding[] {
+        const sortedArray: SaveBuilding[] = [];
+        let i = 0, j = 0;
+    
+        while (i < left.length && j < right.length) {
+            if (left[i].id <= right[j].id) {
+                sortedArray.push(left[i]);
+                i++;
+            } else {
+                sortedArray.push(right[j]);
+                j++;
+            }
+        }
+    
+        return sortedArray.concat(left.slice(i)).concat(right.slice(j));
+    }
 }
+

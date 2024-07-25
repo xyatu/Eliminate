@@ -155,7 +155,8 @@ export default class BuildGameUtil {
         localStorage.setItem(SlotConfig.slot_col, GameManager.inst.playerState.mapCol.toString());
     }
 
-    public static loadSlot(){
+    public static loadSlot() {
         return localStorage.getItem(SlotConfig.slot_haveSlot) === SlotConfig.slot_hasSlot;
     }
 }
+

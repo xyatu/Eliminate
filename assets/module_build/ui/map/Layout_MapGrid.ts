@@ -19,6 +19,11 @@ export class Layout_MapGrid extends Component {
     @property(Node)
     bg: Node = null;
 
+    @property(Node)
+    layerNode: Node[] = [];
+    @property(Node)
+    topLayer: Node = null;
+
     initFinish: boolean = false;
 
     public static inst: Layout_MapGrid = null;

@@ -7,7 +7,7 @@ import { Layout_Normal } from '../ui/ui_normal/Layout_Normal';
 import { Layout_BuildFrame } from '../ui/ui_buildFrame/Layout_BuildFrame';
 import { DataGetter, Sound } from '../../start/DataGetter';
 import { SoundConfig } from '../../start/SoundConfig';
-import { UI_BuildFrame, UI_MapGrid, UI_Normal } from '../../scripts/UIDef';
+import { measure, UI_BuildFrame, UI_MapGrid, UI_Normal } from '../../scripts/UIDef';
 import BuildMapManager from './manager/BuildMapManager';
 import BuildGameConfig_Impl from './data/BuildGameConfig';
 import BuildingPool from '../../scripts/BuildingPool';
@@ -42,14 +42,14 @@ export class BuildGame extends Component {
         // BuildGameUtil.initWallMap();
         this.stateInit();
         tgxUIMgr.inst.showUI(UI_MapGrid, () => {
-            Layout_MapGrid.inst.node.scale = v3(0.5, 0.5, 1);
-            this.loadMap();
         });
         BuildMapManager.init();
         tgxUIMgr.inst.showUI(UI_BuildFrame, () => {
             tgxUIMgr.inst.showUI(UI_Normal, () => {
                 this.changeGold(0);
                 Layout_Normal.inst.node.active = false;
+                Layout_MapGrid.inst.node.scale = v3(0.5, 0.5, 1);
+                this.loadMap();
             })
         });
 
@@ -58,7 +58,10 @@ export class BuildGame extends Component {
         tgxAudioMgr.inst.play(buildBG.audio, buildBG.volumn, true);
     }
 
+    // @measure
     loadMap() {
+        console.time(`loadMap`);
+        log(GameManager.inst.playerState.building);
         BuildGameConfig_Impl.currentIndex = 0;
         Builder.inst.loadMap();
     }

@@ -3,7 +3,6 @@ import { _decorator, Component, find, instantiate, Layout, log, Node, Sprite, tw
 import { Coord, Coordinate } from "../../../scripts/DataStructure";
 import BuildGameConfig from "../../script/data/BuildGameConfig";
 import { tgxUIAlert, tgxUIEditAlert } from "../../../core_tgx/tgx";
-import BuildGameUtil from "../../script/BuildGameUtil";
 import { BuildingState } from "../../script/building/BuildingState";
 import { Building, DataGetter } from "../../../start/DataGetter";
 import { Layout_MapGrid } from "../../ui/map/Layout_MapGrid";
@@ -13,6 +12,8 @@ import BuildMapManager from "./BuildMapManager";
 import BuildingPool from "../../../scripts/BuildingPool";
 import { CharacterManager } from "./CharacterManager";
 import { Layout_Normal } from "../../ui/ui_normal/Layout_Normal";
+import BuildGameUtil from "../BuildGameUtil";
+import { measure } from "../../../scripts/UIDef";
 const { ccclass, property } = _decorator;
 
 const directions = [
@@ -49,54 +50,53 @@ const fence: { [key: string]: number } = {
 }
 
 const autoTileMap: { [key: number]: number[] } = {
-    0: [26, 27, 32, 33],
-    1: [4, 27, 32, 33],
-    2: [26, 5, 32, 33],
-    3: [4, 5, 32, 33],
-    4: [26, 27, 32, 11],
-    5: [4, 27, 32, 11],
-    6: [26, 5, 32, 11],
-    7: [4, 5, 32, 11],
-    8: [26, 27, 10, 33],
-    9: [4, 27, 10, 33],
-    10: [26, 5, 10, 33],
-    11: [4, 5, 10, 33],
-    12: [26, 27, 10, 11],
-    13: [4, 27, 10, 11],
-    14: [26, 5, 10, 11],
-    15: [4, 5, 10, 11],
-    16: [24, 25, 30, 31],
-    17: [24, 5, 30, 31],
-    18: [24, 25, 30, 11],
-    19: [24, 5, 30, 11],
-    20: [14, 15, 20, 21],
-    21: [14, 15, 20, 11],
-    22: [14, 15, 10, 21],
-    23: [14, 15, 10, 11],
-    24: [28, 29, 34, 35],
-    25: [28, 29, 10, 35],
-    26: [4, 29, 34, 35],
-    27: [4, 29, 10, 35],
-    28: [26, 27, 44, 45],
-    29: [4, 39, 44, 45],
-    30: [38, 5, 44, 45],
-    31: [4, 5, 44, 45],
-    32: [24, 29, 30, 35],
-    33: [14, 15, 44, 45],
-    34: [12, 13, 18, 19],
-    35: [12, 13, 18, 11],
-    36: [16, 17, 22, 23],
-    37: [16, 17, 10, 23],
-    38: [40, 41, 46, 47],
-    39: [4, 41, 46, 47],
-    40: [36, 37, 42, 43],
-    41: [36, 5, 42, 43],
-    42: [12, 17, 18, 23],
-    43: [12, 13, 42, 43],
-    44: [36, 41, 42, 47],
-    45: [16, 17, 46, 47],
-    46: [0, 1, 6, 7],
-    47: [0, 1, 6, 7],
+    0b11111111: [26, 27, 32, 33],
+    0b01111111: [4, 27, 32, 33],
+    0b11011111: [26, 5, 32, 33],
+    0b01011111: [4, 5, 32, 33],
+    0b11111110: [26, 27, 32, 11],
+    0b01111110: [4, 27, 32, 11],
+    0b11011110: [26, 5, 32, 11],
+    0b01011110: [4, 5, 32, 11],
+    0b11111011: [26, 27, 10, 33],
+    0b01111011: [4, 27, 10, 33],
+    0b11011011: [26, 5, 10, 33],
+    0b01011011: [4, 5, 10, 33],
+    0b11111010: [26, 27, 10, 11],
+    0b01111010: [4, 27, 10, 11],
+    0b11011010: [26, 5, 10, 11],
+    0b01011010: [4, 5, 10, 11],
+    0b01101011: [24, 25, 30, 31],
+    0b01001011: [24, 5, 30, 31],
+    0b01101010: [24, 25, 30, 11],
+    0b01001010: [24, 5, 30, 11],
+    0b00011111: [14, 15, 20, 21],
+    0b00011110: [14, 15, 20, 11],
+    0b00011011: [14, 15, 10, 21],
+    0b00011010: [14, 15, 10, 11],
+    0b11010110: [28, 29, 34, 35],
+    0b11010010: [28, 29, 10, 35],
+    0b01010110: [4, 29, 34, 35],
+    0b01010010: [4, 29, 10, 35],
+    0b11111000: [26, 27, 44, 45],
+    0b01111000: [4, 39, 44, 45],
+    0b11011000: [38, 5, 44, 45],
+    0b01011000: [4, 5, 44, 45],
+    0b01000010: [24, 29, 30, 35],
+    0b00011000: [14, 15, 44, 45],
+    0b00001011: [12, 13, 18, 19],
+    0b00001010: [12, 13, 18, 11],
+    0b00010110: [16, 17, 22, 23],
+    0b00010010: [16, 17, 10, 23],
+    0b11010000: [40, 41, 46, 47],
+    0b01010000: [4, 41, 46, 47],
+    0b01101000: [36, 37, 42, 43],
+    0b01001000: [36, 5, 42, 43],
+    0b00000010: [12, 17, 18, 23],
+    0b00001000: [12, 13, 42, 43],
+    0b01000000: [36, 41, 42, 47],
+    0b00010000: [16, 17, 46, 47],
+    0b00000000: [0, 1, 6, 7],
 };
 
 const visited = new Set<string>();
@@ -110,6 +110,15 @@ export class Builder extends Component {
 
     isLoaded: boolean = false;
 
+    canvas: UITransform = null;
+
+    getCanvas(): UITransform {
+        if (!this.canvas) {
+            this.canvas = find('Canvas').getComponent(UITransform);
+        }
+        return this.canvas;
+    }
+
     protected onLoad(): void {
         Builder.inst = this;
     }
@@ -119,13 +128,16 @@ export class Builder extends Component {
 
     loadMap() {
         if (BuildGameConfig.currentIndex >= GameManager.inst.playerState.building.length) {
+            console.timeEnd(`loadMap`);
             BuildGameUtil.saveBuilding(); // 全部加载完毕后保存
 
             let coord: Coordinate = GameManager.inst.playerState.playerCoord;
-            if (!coord) coord = Coord(Math.floor(GameManager.inst.playerState.mapCol / 2), Math.floor(GameManager.inst.playerState.mapRow / 2));
+            if (!coord) {
+                coord = new Coordinate(Math.floor(GameManager.inst.playerState.mapCol / 2), Math.floor(GameManager.inst.playerState.mapRow / 2));
+            }
             CharacterManager.createCharacter(true, coord);
 
-            Layout_MapGrid.inst.onFollow(0.01, v2(-BuildMapManager.getPos(coord).x + BuildGameConfig.size / 2, -BuildMapManager.getPos(coord).y))
+            Layout_MapGrid.inst.onFollow(0.01, v2(-BuildMapManager.getPos(coord).x + BuildGameConfig.size / 2, -BuildMapManager.getPos(coord).y));
             Builder.inst.isLoaded = true;
             Layout_Normal.inst.node.active = true;
 
@@ -135,21 +147,21 @@ export class Builder extends Component {
             return;
         }
 
-        const endIndex = Math.min(BuildGameConfig.currentIndex + BuildGameConfig.batchSize, GameManager.inst.playerState.building.length);
+        log(GameManager.inst.playerState.playerCoord)
 
+        const endIndex = Math.min(BuildGameConfig.currentIndex + BuildGameConfig.batchSize, GameManager.inst.playerState.building.length);
         for (let i = BuildGameConfig.currentIndex; i < endIndex; i++) {
             let building = GameManager.inst.playerState.building[i];
             let data: Building = DataGetter.inst.buildingdata.get(building.id);
             let node: Node = Builder.inst.createBuilding(data);
-            Builder.inst.tryBuild(node, data, true, building.coord);
-            node.getComponent(BuildingState).unSelect();
+            let bs: BuildingState = node.getComponent(BuildingState);
+            Builder.inst.tryBuild(node, data, true, bs, building.coord);
+            bs.unSelect();
         }
 
         BuildGameConfig.currentIndex = endIndex;
-
-        // 使用 requestAnimationFrame 在下一帧继续处理
-        requestAnimationFrame(Builder.inst.loadMap);
-    };
+        requestAnimationFrame(() => Builder.inst.loadMap());
+    }
 
     adsorption(building: Node) {
         let coord: Coordinate = BuildMapManager.getCoord(building.position.x, building.position.y + BuildGameConfig.size / 2);
@@ -175,83 +187,68 @@ export class Builder extends Component {
     }
 
     createBuilding(data: Building): Node {
-
-        let building: Node = null;
-        if (BuildingPool.get()) {
-            building = BuildingPool.get();
-        }
-        else {
-            building = instantiate(BuilderComp.inst.building);
-        }
+        let building: Node = BuildingPool.get() || instantiate(BuilderComp.inst.building);
 
         Layout_MapGrid.inst.node.addChild(building);
-
         building.setWorldPosition(BuildGameConfig.canvasW * view.getScaleX() / 2, BuildGameConfig.canvasH * view.getScaleY() / 2, 0);
 
-        building.getComponent(BuildingState).data = data;
+        let bs: BuildingState = building.getComponent(BuildingState);
+        bs.data = data;
         if (data.autoTile === 1) {
-            building.getChildByName('Sprite').children[0].getComponent(Sprite).spriteFrame = data.anim.anim[0];
-            building.getChildByName('Sprite').children[1].getComponent(Sprite).spriteFrame = data.anim.anim[1];
-            building.getChildByName('Sprite').children[2].getComponent(Sprite).spriteFrame = data.anim.anim[6];
-            building.getChildByName('Sprite').children[3].getComponent(Sprite).spriteFrame = data.anim.anim[7];
+            bs.autoTile0.spriteFrame = data.anim.anim[0];
+            bs.autoTile1.spriteFrame = data.anim.anim[1];
+            bs.autoTile2.spriteFrame = data.anim.anim[6];
+            bs.autoTile3.spriteFrame = data.anim.anim[7];
+        } else {
+            bs.buildingSprite.spriteFrame = data.anim.anim[0];
         }
-        else {
-            building.getComponent(Sprite).spriteFrame = data.anim.anim[0];
-        }
+
         if (data.autoTile !== 1) {
-            building.getComponent(UITransform).width = data.anim.anim[0].originalSize.width * 4;
-            building.getComponent(UITransform).height = data.anim.anim[0].originalSize.height * 4;
-        }
-        else {
-            building.getComponent(UITransform).width = 64;
-            building.getComponent(UITransform).height = 64;
+            bs.uiTransform.width = data.anim.anim[0].originalSize.width * 4;
+            bs.uiTransform.height = data.anim.anim[0].originalSize.height * 4;
+        } else {
+            bs.uiTransform.width = 64;
+            bs.uiTransform.height = 64;
         }
 
-        let pos = building.position;
-        let size = building.getComponent(UITransform).contentSize;
-        let canvas = find('Canvas');
-        building.setWorldPosition(canvas.getComponent(UITransform).contentSize.width / 2 - size.width / 2, canvas.getComponent(UITransform).contentSize.height / 2, pos.z);
-
+        building.setWorldPosition(this.getCanvas().contentSize.width / 2 - bs.uiTransform.contentSize.width / 2, this.getCanvas().contentSize.height / 2, building.position.z);
         BuilderComp.inst.setSelect(building);
 
         return building;
     }
 
-    tryBuild(building: Node, data: Building, isLoad: boolean, coord?: Coordinate): boolean {
-        let oldCoord: Coordinate = null;
-        if (building.getComponent(BuildingState).coord) {
-            oldCoord = building.getComponent(BuildingState).coord.copy();
-        }
-        let pos: Coordinate = null;
-        if (coord) {
-            pos = coord;
-        }
-        else {
-            pos = BuildMapManager.getCoord(building.position.x, building.position.y + BuildGameConfig.size / 2);
-        }
+    tryBuild(building: Node, data: Building, isLoad: boolean, bs: BuildingState, coord?: Coordinate): boolean {
+        let oldCoord: Coordinate = bs.coord ? bs.coord.copy() : null;
+        let pos: Coordinate = coord || BuildMapManager.getCoord(building.position.x, building.position.y + BuildGameConfig.size / 2);
 
         if (this.buildCheckVoid(data, pos, building)) {
             this.build(data, building, pos, isLoad, oldCoord);
-            // log(pos);
             return true;
-        }
-        else {
-            tgxUIAlert.show('格子已被占用或未完全在格内', false).onClick(isOK => {
-                // log(`Close`)
-            });
+        } else {
+            tgxUIAlert.show('格子已被占用或未完全在格内', false).onClick(isOK => { });
             return false;
         }
     }
 
-    buildCheckVoid(data: Building, coord: Coordinate, building: Node) {
-        for (let i = 0; i < data.buildShape.length; i++) {
-            for (let j = 0; j < data.buildShape[i].length; j++) {
-                if (data.buildShape[i][j] !== 0) {
-                    try {
-                        if (!BuildMapManager.checkVoid(data.layer, coord.x + j, coord.y + i, building)) {
-                            return false;
-                        }
-                    } catch (error) {
+    buildCheckVoid(data: Building, coord: Coordinate, building: Node): boolean {
+        const buildShape = data.buildShape;
+        const layer = data.layer;
+        const coordX = coord.x;
+        const coordY = coord.y;
+
+        for (let i = 0; i < buildShape.length; i++) {
+            const row = buildShape[i];
+            for (let j = 0; j < row.length; j++) {
+                if (row[j] !== 0) {
+                    const x = coordX + j;
+                    const y = coordY + i;
+
+                    // 提前检查边界条件或其他可能导致错误的情况
+                    if (x < 0 || y < 0 || x >= GameManager.inst.playerState.mapCol || y >= GameManager.inst.playerState.mapRow) {
+                        return false;
+                    }
+
+                    if (!BuildMapManager.checkVoid(layer, x, y, building)) {
                         return false;
                     }
                 }
@@ -259,6 +256,7 @@ export class Builder extends Component {
         }
         return true;
     }
+
 
     build(data: Building, building: Node, coord: Coordinate, isLoad: boolean, oldCoord: Coordinate) {
         Layout_MapGrid.inst.node.getChildByName(data.layer.toString()).addChild(building);
@@ -297,15 +295,18 @@ export class Builder extends Component {
 
     // 在row行，col列绘制一个自动地图元件
     drawAt(data: Building, coord: Coordinate, type: number, building: Node) {
-        for (const iterator of directions) {
-            const newX = coord.x + iterator.dx;
-            const newY = coord.y + iterator.dy;
-            // 判断row和col是否越界
-            if (newX < GameManager.inst.playerState.mapRow && newX >= 0 && newY < GameManager.inst.playerState.mapCol && newY >= 0) {
+        const mapRow = GameManager.inst.playerState.mapRow;
+        const mapCol = GameManager.inst.playerState.mapCol;
+
+        directions.forEach(direction => {
+            const newX = coord.x + direction.dx;
+            const newY = coord.y + direction.dy;
+            if (newX >= 0 && newX < mapRow && newY >= 0 && newY < mapCol) {
                 this.updateTileState(data, newY, newX, type, building);
             }
-        }
+        });
     }
+
     drawTileIndex(data: Building, index: number, building: Node) {
         // 根据index得到对应的小元件表
         let widget: number[] = autoTileMap[index];
@@ -314,104 +315,32 @@ export class Builder extends Component {
             building.getChildByName('Sprite').children[i].getComponent(Sprite).spriteFrame = data.anim.anim[widget[i]];
         }
     }
-    updateTileState(data: Building, row: number, col: number, type: number, building: Node) {
 
-        // log(`data: ${BuildMapManager.dataMapDit[type][row][col]}, row: ${row}, col: ${col}, change: ${BuildMapManager.dataMapDit[type][col][row]}`)
-        // 如果该位置没有地图元件，则直接返回
+    updateTileState(data: Building, row: number, col: number, type: number, building: Node) {
         if (!this.hasTileAt(data, row, col, type)) return;
 
-        let state: number = 0b00000000;
+        const mapDit = BuildMapManager.nodeMapDit[type];
+        let state = 0b00000000;
 
-        if (this.hasTileAt(data, row + 1, col, type)) {
-            state |= 0b01000000;
-        }
-        if (this.hasTileAt(data, row - 1, col, type)) {
-            state |= 0b00000010;
-        }
-        if (this.hasTileAt(data, row, col - 1, type)) {
-            state |= 0b00010000;
-        }
-        if (this.hasTileAt(data, row, col + 1, type)) {
-            state |= 0b00001000;
-        }
-        if (this.hasTileAt(data, row + 1, col - 1, type)) {
-            if ((state | 0b01010000) == state) state |= 0b10000000;
-        }
-        if (this.hasTileAt(data, row + 1, col + 1, type)) {
-            if ((state | 0b01001000) == state) state |= 0b00100000;
-        }
-        if (this.hasTileAt(data, row - 1, col - 1, type)) {
-            if ((state | 0b00010010) == state) state |= 0b00000100;
-        }
-        if (this.hasTileAt(data, row - 1, col + 1, type)) {
-            if ((state | 0b00001010) == state) state |= 0b00000001;
-        }
+        state |= this.hasTileAt(data, row + 1, col, type) ? 0b01000000 : 0;
+        state |= this.hasTileAt(data, row - 1, col, type) ? 0b00000010 : 0;
+        state |= this.hasTileAt(data, row, col - 1, type) ? 0b00010000 : 0;
+        state |= this.hasTileAt(data, row, col + 1, type) ? 0b00001000 : 0;
 
-        let index: number = 0;
+        if (this.hasTileAt(data, row + 1, col - 1, type) && (state & 0b01010000) === 0b01010000) state |= 0b10000000;
+        if (this.hasTileAt(data, row + 1, col + 1, type) && (state & 0b01001000) === 0b01001000) state |= 0b00100000;
+        if (this.hasTileAt(data, row - 1, col - 1, type) && (state & 0b00010010) === 0b00010010) state |= 0b00000100;
+        if (this.hasTileAt(data, row - 1, col + 1, type) && (state & 0b00001010) === 0b00001010) state |= 0b00000001;
 
-        switch (state) {
-            case 0b11111111: index = 0; break;
-            case 0b01111111: index = 1; break;
-            case 0b11011111: index = 2; break;
-            case 0b01011111: index = 3; break;
-            case 0b11111110: index = 4; break;
-            case 0b01111110: index = 5; break;
-            case 0b11011110: index = 6; break;
-            case 0b01011110: index = 7; break;
-            case 0b11111011: index = 8; break;
-            case 0b01111011: index = 9; break;
-            case 0b11011011: index = 10; break;
-            case 0b01011011: index = 11; break;
-            case 0b11111010: index = 12; break;
-            case 0b01111010: index = 13; break;
-            case 0b11011010: index = 14; break;
-            case 0b01011010: index = 15; break;
-            case 0b01101011: index = 16; break;
-            case 0b01001011: index = 17; break;
-            case 0b01101010: index = 18; break;
-            case 0b01001010: index = 19; break;
-            case 0b00011111: index = 20; break;
-            case 0b00011110: index = 21; break;
-            case 0b00011011: index = 22; break;
-            case 0b00011010: index = 23; break;
-            case 0b11010110: index = 24; break;
-            case 0b11010010: index = 25; break;
-            case 0b01010110: index = 26; break;
-            case 0b01010010: index = 27; break;
-            case 0b11111000: index = 28; break;
-            case 0b01111000: index = 29; break;
-            case 0b11011000: index = 30; break;
-            case 0b01011000: index = 31; break;
-            case 0b01000010: index = 32; break;
-            case 0b00011000: index = 33; break;
-            case 0b00001011: index = 34; break;
-            case 0b00001010: index = 35; break;
-            case 0b00010110: index = 36; break;
-            case 0b00010010: index = 37; break;
-            case 0b11010000: index = 38; break;
-            case 0b01010000: index = 39; break;
-            case 0b01101000: index = 40; break;
-            case 0b01001000: index = 41; break;
-            case 0b00000010: index = 42; break;
-            case 0b00001000: index = 43; break;
-            case 0b01000000: index = 44; break;
-            case 0b00010000: index = 45; break;
-            case 0b00000000: index = 46; break;
-        }
-
-        // log(col, row, index)
-
-        // 判断其周围8个格子的状态state
-        // 根据判断的状态确定情况的编号index
-        this.drawTileIndex(data, index, BuildMapManager.nodeMapDit[type][row][col]);
+        this.drawTileIndex(data, state, mapDit[row][col]);
     }
-    hasTileAt(data: Building, row: number, col: number, type: number) {
-        if (col < GameManager.inst.playerState.mapRow && col >= 0 && row < GameManager.inst.playerState.mapCol && row >= 0) {
-            return BuildMapManager.nodeMapDit[type][row][col] &&
-                BuildMapManager.nodeMapDit[type][row][col].getComponent(BuildingState).data.autoTile === 1 &&
-                BuildMapManager.nodeMapDit[type][row][col].getComponent(BuildingState).data.id === data.id;
+
+    hasTileAt(data: Building, row: number, col: number, type: number): boolean {
+        if (row >= 0 && row < GameManager.inst.playerState.mapRow && col >= 0 && col < GameManager.inst.playerState.mapCol) {
+            const tile = BuildMapManager.nodeMapDit[type][row][col];
+            return tile && tile.getComponent(BuildingState).data.autoTile === 1 && tile.getComponent(BuildingState).data.id === data.id;
         }
-        else return false;
+        return false;
     }
 
     drawFence(data: Building, coord: Coordinate, type: number, building: Node) {

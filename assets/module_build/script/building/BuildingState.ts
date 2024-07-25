@@ -1,4 +1,4 @@
-import { _decorator, Button, Component, EventTouch, log, Node, NodeEventType, Sprite, UITransform, v3, Vec2, Vec3 } from 'cc';
+import { _decorator, Button, Component, EventTouch, log, Node, NodeEventType, sp, Sprite, UITransform, v3, Vec2, Vec3 } from 'cc';
 import { Layout_MapGrid } from '../../ui/map/Layout_MapGrid';
 import BuildGameUtil from '../BuildGameUtil';
 import { Building, DataGetter, Sound } from '../../../start/DataGetter';
@@ -28,6 +28,21 @@ export class BuildingState extends Component {
     @property(Node)
     bg: Node = null;
 
+    @property(Sprite)
+    autoTile0: Sprite = null;
+    @property(Sprite)
+    autoTile1: Sprite = null;
+    @property(Sprite)
+    autoTile2: Sprite = null;
+    @property(Sprite)
+    autoTile3: Sprite = null;
+
+    @property(Sprite)
+    buildingSprite: Sprite = null;
+
+    @property(UITransform)
+    uiTransform: UITransform = null;
+
     isSelect: boolean = true;
 
     data: Building = null;
@@ -50,7 +65,7 @@ export class BuildingState extends Component {
         this.move.node.active = true;
         this.putDown.node.active = true;
         this.Del.node.active = true;
-        this.node.parent = this.node.parent.parent.children[this.node.parent.parent.children.length - 1];
+        this.node.parent = Layout_MapGrid.inst.topLayer;
     }
 
     unSelect() {
@@ -63,7 +78,7 @@ export class BuildingState extends Component {
         if (this.coord) {
             let loc: Vec2 = BuildMapManager.getPos(this.coord);
             this.node.setPosition(loc.x, loc.y - BuildGameConfig.size / 2, this.node.position.z);
-            this.node.parent = this.node.parent.parent.getChildByName(this.data.layer.toString());
+            this.node.parent = Layout_MapGrid.inst.layerNode[this.data.layer];
         }
     }
 
@@ -71,7 +86,7 @@ export class BuildingState extends Component {
         let sound: Sound = DataGetter.inst.sound.get(SoundConfig.build_determine);
         tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
         if (BuildGameUtil.nodeIsInsideTargetArea(this.node, Layout_MapGrid.inst.node)) {
-            if (Builder.inst.tryBuild(this.node, this.data, false)) {
+            if (Builder.inst.tryBuild(this.node, this.data, false, this)) {
                 this.unSelect();
             }
         }
@@ -98,8 +113,8 @@ export class BuildingState extends Component {
         if (!this.isSelect) {
             let sound: Sound = DataGetter.inst.sound.get(SoundConfig.build_select);
             tgxAudioMgr.inst.playOneShot(sound.audio, sound.volumn);
-            this.select();
             BuilderComp.inst.setSelect(this.node);
+            this.select();
         }
     }
 

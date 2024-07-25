@@ -40,13 +40,6 @@ export class UI_MapGrid_Impl extends UI_MapGrid {
             instantiate(layout.cell).setParent(layout.grid.node);
         }
 
-        for (let index = BuildGameConfig.buttomLayer; index < BuildGameConfig.buttomLayer + BuildGameConfig.layers; index++) {
-            let layer: Node = instantiate(layout.layer);
-            this.node.addChild(layer);
-            layer.setPosition(0, 0, index * 100 - 2000);
-            layer.name = index.toString();
-        }
-
         this.node.getChildByName('grid').setSiblingIndex(this.node.children.length - 2)
 
         layout.initFinish = true;
@@ -92,7 +85,7 @@ export class UI_MapGrid_Impl extends UI_MapGrid {
     }
 
     mouseWheel(event: EventMouse) {
-        if (BuilderComp.inst.selectedBuilding || BuildGame.inst.isBuild || !Builder.inst.isLoaded) return;
+        if (BuilderComp.inst.selectedBuilding || !BuildGame.inst.isBuild || !Builder.inst.isLoaded) return;
         Layout_MapGrid.inst.onChangeScale(event.getScrollY() > 0);
     }
 

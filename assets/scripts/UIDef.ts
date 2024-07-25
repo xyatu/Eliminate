@@ -28,3 +28,16 @@ export class BuildGameConfig {
     public static autoTileHeight: number = 64;
     public static autoTileSize: number = 8;
 }
+
+export function measure(target: any, name: any, descriptor: any) {
+    const originalMethod = descriptor.value;
+    descriptor.value = async function (...args: any[]) {
+        const startTime = Date.now();
+        const result = await originalMethod.apply(this, args);
+        const endTime = Date.now();
+        console.log(`执行时间为 ${endTime - startTime} ms`);
+        return result;
+    }
+
+    return descriptor;
+}

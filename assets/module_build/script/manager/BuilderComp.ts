@@ -1,5 +1,6 @@
 import { _decorator, Component, Node, Prefab } from 'cc';
 import { BuildingState } from '../building/BuildingState';
+import BuildingPool from '../../../scripts/BuildingPool';
 const { ccclass, property } = _decorator;
 
 @ccclass('BuilderComp')
@@ -17,17 +18,18 @@ export class BuilderComp extends Component {
     }
 
     setSelect(building: Node) {
-        if (building) {
-            if (this.selectedBuilding) {
-                if (this.selectedBuilding.getComponent(BuildingState).coord) {
-                    this.selectedBuilding.getComponent(BuildingState).unSelect();
-                }
-                else {
-                    this.selectedBuilding.destroy();
-                }
+        let old = this.selectedBuilding;
+
+        this.selectedBuilding = building;
+        if (old) {
+            let oldBs = old.getComponent(BuildingState);
+            if (oldBs.coord) {
+                oldBs.unSelect();
+            }
+            else {
+                BuildingPool.put(old);
             }
         }
-        this.selectedBuilding = building;
     }
 }
 
