@@ -6,6 +6,7 @@ import { tgxAudioMgr, tgxUIMgr } from '../../../../../core_tgx/tgx';
 import { DataGetter, Sound } from '../../../../../start/DataGetter';
 import { SoundConfig } from '../../../../../start/SoundConfig';
 import { SlotConfig } from '../../../../../start/SlotConfig';
+import { BuildGame } from '../../../../script/BuildGame';
 const { ccclass, property } = _decorator;
 
 @ccclass('EliminateState')
@@ -39,7 +40,7 @@ export class EliminateState extends Component {
         EliminateState.inst.isGameOver = true;
         let gold = Math.floor(EliminateState.inst.score / 100);
 
-        GameManager.inst.onGoldChange(gold);
+        BuildGame.inst.changeGold(gold)
         EliminateState.inst.saveGold();
 
         let over: UI_OverComp = tgxUIMgr.inst.showUI(UI_OverComp, () => {

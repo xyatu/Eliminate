@@ -104,14 +104,16 @@ export class GridMovement extends Component {
 
     resetLayer() {
         let coord = this.node.getComponent(CharacterState).characterCoord;
+        let b: boolean = false;
         for (let index = 0; index < BuildGameConfig.layers; index++) {
             if (BuildMapManager.collisionMapDit[index][coord.y][coord.x] !== 0) {
                 Layout_MapGrid.inst.node.getChildByName(index < BuildGameConfig.buttomRole ? BuildGameConfig.buttomRole.toString() : index.toString()).addChild(this.node);
+                b = true;
                 break;
             }
-            else{
-                
-            }
+        }
+        if (!b) {
+            Layout_MapGrid.inst.node.getChildByName('11').addChild(this.node);
         }
     }
 }

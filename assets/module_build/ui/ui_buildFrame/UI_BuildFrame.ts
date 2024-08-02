@@ -1,7 +1,7 @@
 import { _decorator, Component, EventMouse, EventTouch, instantiate, log, math, Node, NodeEventType, Rect, Sprite, SpriteFrame, v2, v3 } from 'cc';
 import { UILayers } from '../../../core_tgx/easy_ui_framework/UILayers';
 import { Layout_BuildFrame } from './Layout_BuildFrame';
-import { tgxEasyController, tgxModuleContext, tgxUIAlert, tgxUIController, tgxUIMgr } from '../../../core_tgx/tgx';
+import { tgxModuleContext, tgxUIAlert, tgxUIController, tgxUIMgr } from '../../../core_tgx/tgx';
 import { UI_Building } from '../ui_building/UI_Building';
 import { Layout_MapGrid } from '../map/Layout_MapGrid';
 import BuildGameConfig from '../../script/data/BuildGameConfig'

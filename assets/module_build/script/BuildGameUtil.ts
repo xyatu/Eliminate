@@ -67,7 +67,7 @@ export default class BuildGameUtil {
     }
 
     public static dragShow(event: EventTouch) {
-        const delta = event.getDelta();
+        const delta = event.getDelta().divide2f(2, 2);
 
         let newPos = v3(Layout_MapGrid.inst.node.getPosition().x + delta.x, Layout_MapGrid.inst.node.getPosition().y + delta.y, Layout_MapGrid.inst.node.getPosition().z)
 
