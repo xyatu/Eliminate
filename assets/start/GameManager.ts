@@ -11,7 +11,7 @@ const { ccclass, property } = _decorator;
 export class PlayerState {
     playerCoord: Coordinate = null;
     hasBuilding: number[] = [];
-    gold: number = 0;
+    gold: number = 10000000000000000000000000000;
     mapCol: number = 22;
     mapRow: number = 22;
     prosperous: number = 0;

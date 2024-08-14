@@ -63,6 +63,8 @@ export class UI_BuildFrame_Impl extends UI_BuildFrame {
             tgxUIAlert.show('你确定要移除全部建筑吗', true).onClick(isok => {
                 if (isok) {
                     BuildMapManager.ClearAll();
+                    GameManager.inst.playerState.building = [];
+                    BuildGameUtil.saveBuilding();
                 }
             })
         }, this);
